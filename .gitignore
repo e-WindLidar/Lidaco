@@ -1,0 +1,5 @@
+**/*.nc
+**/*.ncml
+
+.idea
+__pycache__
