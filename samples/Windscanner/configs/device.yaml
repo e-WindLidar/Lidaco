@@ -1,0 +1,16 @@
+attributes:
+
+  # instrument description
+  lidar_technology: 'pulsed'
+  lidar_scanning_type: 'scanning'
+  lidar_range_classification: 'long'
+  lidar_installation_type: 'ground-based'
+  product_name: 'Leosphere WLS-200S'
+  lidar_is_mobile: 'false'
+  idar_orientation: 'not applicable'
+  flow_direction_encoding: '1'
+  serial_number: '#12'
+  specific_lidar_name: 'Vara'
+  specific_lidar_owner: 'DTU Wind'
+  specific_lidar_operator: 'DTU Wind'
+  instrument_comment: ''

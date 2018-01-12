@@ -1,0 +1,10 @@
+imports: # read in order
+  - ./configs/device.yaml
+  - ./configs/scenario.yaml
+  - ./configs/metainfo.yaml
+
+parameters:
+  data_path: samples/WindcubeV2/
+  input_format: Windcubev2
+  output_format: NetCDF4
+

@@ -1,0 +1,14 @@
+version: '3.3'
+
+services:
+  python:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    stdin_open: true
+    tty: true
+    environment:
+      - DISPLAY=$DISPLAY
+    volumes:
+      - .:/usr/src/app
+      - /tmp/.X11-unix:/tmp/.X11-unix

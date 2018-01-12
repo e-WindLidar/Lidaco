@@ -1,0 +1,11 @@
+attributes:
+
+  # general data set description
+  conventions: 'e-WindLidar'
+  version: '1.0'
+  title: 'NEWA Kassel Experiment'
+  creator: 'Fraunhofer IWES, Kassel, Germany'
+  references: '-'
+  general_comment: 'Lidar profiler provided by ENERCON'
+
+

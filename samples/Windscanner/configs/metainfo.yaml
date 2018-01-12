@@ -1,0 +1,14 @@
+attributes:
+
+  # general data set description
+  conventions: 'e-WindLidar'
+  version: '1.0'
+  title: 'NEWA Kassel Experiment'
+  creator: 'Tobias Klaas, Fraunhofer IWES, Kassel, Germany'
+  references: 'Kühn, P. et al.: Experiment Documentation. NEWA Forested Hill Experiment Kassel. Technical Report, Fraunhofer IWES, Kassel 2017.'
+  site: 'WS1, Roedeser Berg, Kassel, Germany'
+  general_comment: 'Lidar profiler provided by ENERCON'
+
+  # data description
+  data_processing_history: ''
+
