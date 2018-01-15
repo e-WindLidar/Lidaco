@@ -29,7 +29,6 @@ class Config:
         except FileNotFoundError as e:
             Logger.error('bad_config_path', full_path.replace("/./", "/"))
         except Exception as e:
-            Logger
             Logger.error('bad_config_formatting', str(e))
 
         if 'imports' in configs:

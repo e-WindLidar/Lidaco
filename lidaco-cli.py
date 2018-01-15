@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from src.core.Builder import Builder
-from src.core.Logger import Logger
+from lidaco.core.Builder import Builder
+from lidaco.core.Logger import Logger
 from os import path
 import argparse
 
@@ -26,6 +26,8 @@ if __name__ == "__main__":
                         help='display version information and exit')
     parser.add_argument('--debug', action='store_true', default=False,
                         help='Shows internal error messages')
+    parser.add_argument('--context', default='',
+                        help='Path to which relative paths, such as config-file or data-path, are resolved.')
 
     args = parser.parse_args()
 
@@ -33,6 +35,5 @@ if __name__ == "__main__":
     Logger.header()
 
     if not args.version:
-        context = path.dirname(__file__)
-        builder = Builder(context, args)
+        builder = Builder(args)
         builder.build()

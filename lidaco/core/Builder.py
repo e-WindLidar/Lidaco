@@ -5,6 +5,18 @@ from .ModuleLoader import ModuleLoader
 from .Config import Config
 
 
+class Arguments:
+    verbose = False
+    debug = False
+
+    def __init__(self, config_file=None, output_format=None, input_format=None, data_path=None, context=''):
+        self.config_file = config_file
+        self.output_format = output_format
+        self.input_format = input_format
+        self.data_path = data_path
+        self.context = context
+
+
 class Builder:
     """
     Main class. Orchestrates all the conversion steps.
@@ -17,7 +29,7 @@ class Builder:
     configs = {}
     args = {}
 
-    def __init__(self, context, args):
+    def __init__(self, args=Arguments()):
         """
         Initialization block. Loads a main config.yaml file, a reader, a writer and the remaining
         "meta-data" configurations. Overrides main configurations with the terminal arguments.
@@ -27,10 +39,12 @@ class Builder:
         """
 
         self.args = args
+        context = self.params('context')
 
         absolute_path = path.join(context, args.config_file)
         import_dir_path = path.dirname(absolute_path)
         import_filename = path.basename(absolute_path)
+
         self.configs = Config(import_dir_path, import_filename)
 
         try:
@@ -61,7 +75,6 @@ class Builder:
         :param default:
         :return:
         """
-
         if key is None:
             return self.configs['parameters']
         elif hasattr(self.args, key) and getattr(self.args, key) is not None:
@@ -92,7 +105,7 @@ class Builder:
 
         reader = self.module_loader.get_reader(self.params('input_format'))()
         reader.verify_parameters(self.params())
-        files = reader.fetch_input_files(self.params('data_path'))
+        files = reader.fetch_input_files(path.join(self.params('context'), self.params('data_path')))
 
         for key, file, i in common_iterable(files):
 
