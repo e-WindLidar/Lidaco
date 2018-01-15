@@ -1,19 +1,19 @@
-src package
-===========
+lidaco package
+==============
 
 Subpackages
 -----------
 
 .. toctree::
 
-    src.core
-    src.readers
-    src.writers
+    lidaco.core
+    lidaco.readers
+    lidaco.writers
 
 Module contents
 ---------------
 
-.. automodule:: src
+.. automodule:: lidaco
     :members:
     :undoc-members:
     :show-inheritance:

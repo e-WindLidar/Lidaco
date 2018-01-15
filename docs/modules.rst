@@ -1,7 +1,11 @@
-src
+app
 ===
 
 .. toctree::
    :maxdepth: 4
 
-   src
+   lidaco
+   lidaco-cli
+   lidaco.core
+   lidaco.readers
+   lidaco.writers
