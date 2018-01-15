@@ -84,7 +84,7 @@ class Builder:
         """
         Main loop - connects the reader with the writer.
         Iterates over input data files / file groups:
-            - Reading meta attributes from "meta-data" configurations
+        - Reading meta attributes from "meta-data" configurations
         :return:
         """
         writer = None
