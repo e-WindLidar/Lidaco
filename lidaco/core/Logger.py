@@ -1,3 +1,5 @@
+import sys
+
 class Logger:
     """
     Handles output printing.
@@ -114,4 +116,4 @@ class Logger:
         :return:
         """
         Logger.__print_std_output('[Error] ', msg_name, *args)
-        exit()
+        sys.exit()
