@@ -1,0 +1,11 @@
+attributes:
+
+  # general data set description
+  conventions: 'e-WindLidar'
+  version: '1.0'
+  title: '2017 Perdigao Turb7'
+  creator: '###'
+  references: '-'
+  general_comment: '###'
+
+
