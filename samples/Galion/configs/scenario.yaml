@@ -1,6 +1,13 @@
 parameters:
 
   output_block_size: # accepts positive values and <nothing> (in the latter case, produces only one output file)
+  n_gates: 4
+  range_gates: '30;60;90;120'
+  measurement_scenarios:
+    RHI: '1;12'
+    PPI: '13;18'
+    RHI: '19'
+    VAD: '20;21'
 
 attributes:
 
@@ -8,7 +15,6 @@ attributes:
   n_gates_vary: 'false'
   spatial_averaging_info: 'An FFT size of 64 and a the pulse length middle has been used.'
   beam_sweeping: 'true'
-  measurement_scenario: 'several types'
   n_lidars: '0'
   linked_lidars: 'not applicable'
   configuration_comment: 'FFT size, pulse length have to be verified.'
