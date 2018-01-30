@@ -28,12 +28,13 @@ class Galion(Reader):
         return filename[:-4]
 
     def required_params(self):
-        return ['n_gates', 'range_gates', 'measurement_scenarios']
+        return ['n_gates', 'range_gates', 'constant_gates', 'measurement_scenarios']
 
     def read_to(self, output_dataset, input_filepath, configs, index):
         with open(input_filepath) as file:
             nr_gates = configs['parameters']['n_gates']
             range_gates = configs['parameters']['range_gates']
+            constant_gates = configs['parameters']['constant_gates']
             measurement_scenarios = configs['parameters']['measurement_scenarios']
             raw_file = file.readlines()
 
@@ -42,8 +43,7 @@ class Galion(Reader):
             metadata = raw_file[:6]
             data = raw_file[6:]
 
-            # It is useful to have defined the number of ranges per scan
-            scans = np.array(list(chunks([row.strip().split('\t') for row in data], 42)))
+            scans = np.array(list(chunks([row.strip().split('\t') for row in data], int(nr_gates))))
 
             # create the dimensions
             output_dataset.createDimension('range', nr_gates)
@@ -54,7 +54,10 @@ class Galion(Reader):
             range1 = output_dataset.createVariable('range', 'f4', ('range',))
             range1.units = 'm'
             range1.long_name = 'range_gate_distance_from_lidar'
-            range1[:] = np.array(range_gates.split(';')).astype(float)
+            if constant_gates:
+                range1[:] = np.full(nr_gates, float(range_gates))
+            else:
+                range1[:] = np.array(range_gates.split(';')).astype(float)
             range1.comment = ''
 
             # time
@@ -111,12 +114,29 @@ class Galion(Reader):
             roll.accuracy_info = 'No information on roll accuracy available.'
 
             # create the data variables
-            scan_type = output_dataset.createVariable('scan_type', 'i')
+            scan_type = output_dataset.createVariable('scan_type', 'i', 'time')
             scan_type.units = 'none'
             scan_type.long_name = 'scan_type_of_the_measurement'
-            scan_type[:] = 4
 
-            scan_id = output_dataset.createVariable('scan_id', 'i')
+            scan_id = output_dataset.createVariable('scan_id', 'i', 'time')
             scan_id.units = 'none'
             scan_id.long_name = 'scan_id_of_the_measurement'
-            scan_id[:] = 1
+
+            invalid_scans = 0
+            scan_index = 1
+            for s in measurement_scenarios:
+                long_name = s['scenario']
+                _type = int(s['type'])
+                scans = s['scans']
+                if long_name == 'INVALID':
+                    split_scans = scans.split(';')
+                    for ss in split_scans:
+                        invalid_scans += int(ss.split('-')[1]) - int(ss.split('-')[0]) + 1
+                else:
+                    split_scans = scans.split(';')
+                    for ss in split_scans:
+                        initial_index = int(ss.split('-')[0]) - (invalid_scans + 1)
+                        final_index = int(ss.split('-')[1]) - (invalid_scans + 1)
+                        scan_type[initial_index:final_index + 1] = _type
+                        scan_id[initial_index:final_index + 1] = scan_index
+                    scan_index += 1

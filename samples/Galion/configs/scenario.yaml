@@ -1,13 +1,22 @@
 parameters:
 
   output_block_size: # accepts positive values and <nothing> (in the latter case, produces only one output file)
-  n_gates: 4
-  range_gates: '30;60;90;120'
+  n_gates: 42
+  constant_gates: 'true'
+  range_gates: '30'
   measurement_scenarios:
-    RHI: '1;12'
-    PPI: '13;18'
-    RHI: '19'
-    VAD: '20;21'
+    - scenario: 'INVALID'
+      type: -1
+      scans: '1-2'
+    - scenario: 'PPI'
+      type: 3
+      scans: '3-208;244-254'
+    - scenario: 'RHI'
+      type: 4
+      scans: '209-243'
+    - scenario: 'VAD'
+      type: 2
+      scans: '255-290'
 
 attributes:
 
