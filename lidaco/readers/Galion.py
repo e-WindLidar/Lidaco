@@ -77,6 +77,7 @@ class Galion(Reader):
             azimuth_angle = output_dataset.createVariable('azimuth_angle', 'f4', 'time')
             azimuth_angle.units = 'degrees'
             azimuth_angle.long_name = 'azimuth_angle_of_lidar beam'
+            azimuth_angle[:] = (scans[:, :, 4])[:, 0]
             azimuth_angle.comment = ''
             azimuth_angle.accuracy = ''
             azimuth_angle.accuracy_info = ''
@@ -84,31 +85,32 @@ class Galion(Reader):
             elevation_angle = output_dataset.createVariable('elevation_angle', 'f4', 'time')
             elevation_angle.units = 'degrees'
             elevation_angle.long_name = 'elevation_angle_of_lidar beam'
+            elevation_angle[:] = (scans[:, :, 5])[:, 0]
             elevation_angle.comment = ''
             elevation_angle.accuracy = ''
             elevation_angle.accuracy_info = ''
 
             # yaw, pitch, roll
-            yaw = output_dataset.createVariable('yaw', 'f4')
+            yaw = output_dataset.createVariable('yaw', 'f4', 'time')
             yaw.units = 'degrees'
             yaw.long_name = 'lidar_yaw_angle'
-            yaw[:] = 0
+            yaw[:] = np.zeros(len(scans))
             yaw.comment = 'The home position of the lidar has been configured in a way that 0 azimuth corresponds to ' \
                           'north. '
             yaw.accuracy = ''
 
-            pitch = output_dataset.createVariable('pitch', 'f4')
+            pitch = output_dataset.createVariable('pitch', 'f4', 'time')
             pitch.units = 'degrees'
             pitch.long_name = 'lidar_pitch_angle'
-            pitch[:] = 0
+            pitch[:] = (scans[:, :, 6])[:, 0]
             pitch.comment = ''
             pitch.accuracy = ''
             pitch.accuracy_info = 'No information on pitch accuracy available.'
 
-            roll = output_dataset.createVariable('roll', 'f4')
+            roll = output_dataset.createVariable('roll', 'f4', 'time')
             roll.units = 'degrees'
             roll.long_name = 'lidar_roll_angle'
-            roll[:] = 0
+            roll[:] = (scans[:, :, 7])[:, 0]
             roll.comment = ''
             roll.accuracy = ''
             roll.accuracy_info = 'No information on roll accuracy available.'
@@ -121,6 +123,19 @@ class Galion(Reader):
             scan_id = output_dataset.createVariable('scan_id', 'i', 'time')
             scan_id.units = 'none'
             scan_id.long_name = 'scan_id_of_the_measurement'
+
+            # measurement variables
+            # TODO verify metadata
+            # Doppler and Intensity
+            DOPPLER = output_dataset.createVariable('DOPPLER', 'f4', ('time', 'range'))
+            DOPPLER.units = 'm.s-1'
+            DOPPLER.long_name = 'doppler'
+            DOPPLER[:] = (scans[:, :, 1])[:]
+
+            INTENSITY = output_dataset.createVariable('INTENSITY', 'f4', ('time', 'range'))
+            INTENSITY.units = 'm.s-1'
+            INTENSITY.long_name = 'intensity'
+            INTENSITY[:] = (scans[:, :, 2])[:]
 
             invalid_scans = 0
             scan_index = 1
