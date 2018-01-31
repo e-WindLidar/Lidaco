@@ -2,6 +2,15 @@ from ..core.Reader import Reader
 import numpy as np
 import datetime
 
+# Change this to parameters, if necessary.
+doppler_index = 1
+intensity_index = 2
+time_index = 3
+azimuth_index = 4
+elevation_index = 5
+pitch_index = 6
+roll_index = 7
+
 
 def chunks(l, n):
     for i in range(0, len(l), n):
@@ -126,7 +135,7 @@ class Galion(Reader):
             start_time_seconds = process_time(start_time_str)
             time.long_name = 'seconds since ' + start_time_str
             # array manipulation to obtain timestamps
-            timestamps = (scans[:, :, 3])[:, 0]
+            timestamps = (scans[:, :, time_index])[:, 0]
             time[:] = np.array(list(map(lambda x: process_time(x) - start_time_seconds, timestamps)))
             time.comment = ''
 
@@ -139,9 +148,9 @@ class Galion(Reader):
             scan_id.units = 'none'
             scan_id.long_name = 'scan_id_of_the_measurement'
 
-            create_variables(output_dataset, (scans[:, :, 4])[:, 0], (scans[:, :, 5])[:, 0], np.zeros(len(scans)),
-                             (scans[:, :, 6])[:, 0], (scans[:, :, 7])[:, 0],
-                             (scans[:, :, 1]), (scans[:, :, 2]))
+            create_variables(output_dataset, (scans[:, :, azimuth_index])[:, 0], (scans[:, :, elevation_index])[:, 0], np.zeros(len(scans)),
+                             (scans[:, :, pitch_index])[:, 0], (scans[:, :, roll_index])[:, 0],
+                             (scans[:, :, doppler_index]), (scans[:, :, intensity_index]))
 
             invalid_scans = 0
             scan_index = 1
@@ -168,11 +177,11 @@ class Galion(Reader):
                         final_index = int(ss.split('-')[1]) - (invalid_scans + 1)
                         scan_type[initial_index:final_index + 1] = _type
                         scan_id[initial_index:final_index + 1] = scan_index
-                        _azimuth[initial_index:final_index + 1] = scans[initial_index:final_index+1, :, 4][:, 0]
-                        _elevation[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, 5][:, 0]
-                        _pitch[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, 6][:, 0]
-                        _roll[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, 7][:, 0]
-                        _doppler[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, 1]
-                        _intensity[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, 2]
+                        _azimuth[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, azimuth_index][:, 0]
+                        _elevation[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, elevation_index][:, 0]
+                        _pitch[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, pitch_index][:, 0]
+                        _roll[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, roll_index][:, 0]
+                        _doppler[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, doppler_index]
+                        _intensity[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, intensity_index]
                     create_variables(scan_group, _azimuth, _elevation, _yaw, _pitch, _roll, _doppler, _intensity)
                     scan_index += 1
