@@ -19,7 +19,7 @@ def process_time(timestamp):
 def create_variables(group, azimuth, elevation, _yaw, _pitch, _roll, doppler, intensity):
     # create the beam steering variables
     # azimuth and elevation
-    azimuth_angle = group.createVariable('azimuth_angle1', 'f4', 'time')
+    azimuth_angle = group.createVariable('azimuth_angle', 'f4', 'time')
     azimuth_angle.units = 'degrees'
     azimuth_angle.long_name = 'azimuth_angle_of_lidar beam'
     azimuth_angle[:] = azimuth
@@ -169,5 +169,10 @@ class Galion(Reader):
                         scan_type[initial_index:final_index + 1] = _type
                         scan_id[initial_index:final_index + 1] = scan_index
                         _azimuth[initial_index:final_index + 1] = scans[initial_index:final_index+1, :, 4][:, 0]
+                        _elevation[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, 5][:, 0]
+                        _pitch[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, 6][:, 0]
+                        _roll[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, 7][:, 0]
+                        _doppler[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, 1]
+                        _intensity[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, 2]
                     create_variables(scan_group, _azimuth, _elevation, _yaw, _pitch, _roll, _doppler, _intensity)
                     scan_index += 1
