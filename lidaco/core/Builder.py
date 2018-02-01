@@ -148,6 +148,6 @@ class Builder:
         Logger.info('done')
 
 
-def quick_build(args):
-    builder = Builder(args)
+def build(**args):
+    builder = Builder(**args)
     builder.build()
