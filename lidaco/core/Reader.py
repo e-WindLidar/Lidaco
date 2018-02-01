@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from os import listdir
 from itertools import groupby
-from .Logger import Logger
+from lidaco.common.Logger import Logger
 
 
 class Reader(ABC):
@@ -19,7 +19,7 @@ class Reader(ABC):
         super().__init__()
         self.data_grouping = data_grouping
 
-    def fetch_input_files(self, dir_path):
+    def fetch_input_files( self, dir_path):
         """
         Lists and filters input data files. If the reader specifies a group_by function,
         it also groups files by that value, return a dictionary group => [files].
@@ -36,12 +36,15 @@ class Reader(ABC):
         if self.data_grouping:
             Logger.info('grouping')
             files.sort()
-            groups = {}
+            input_files = []
+
             for k, g in groupby(files, self.group_id):
-                groups[k] = list(g)
-            return groups
+                input_files.append({'id': k, 'files': list(g)})
         else:
-            return files
+            input_files = [{'id': f, 'files': f} for f in files]
+
+        input_files.sort(key=lambda group: group['id'])
+        return input_files
 
     @abstractmethod
     def accepts_file(self, filename):

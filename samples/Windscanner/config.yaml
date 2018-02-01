@@ -5,6 +5,9 @@ imports: # read in order
 
 parameters:
 
-  data_path: samples/Windscanner/
-  input_format: Windscanner
-  output_format: NetCDF4
+  input:
+    path: .
+    format: Windscanner
+
+  output:
+    format: NetCDF4

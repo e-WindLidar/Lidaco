@@ -1,5 +1,6 @@
 import sys
 
+
 class Logger:
     """
     Handles output printing.
@@ -10,7 +11,9 @@ class Logger:
         'separator': separator,
         'header': "{} \nWindsOf - NetCDF lidar data converters - v0.1 \n{}".format(separator, separator),
         'bad_config_path': 'No configuration file ({}) found.',
-        'data_path_missing': 'Missing "data_path" config. Use -D to quickly set it.',
+        'inp_path_missing': 'Missing input path config. Use -D to quickly set it.',
+        'inp_format_missing': 'Missing input format config. Use -I to quickly set it.',
+        'out_format_missing': 'Missing output format config. Use -O to quickly set it.',
         'bad_inp_format': 'No reader found to support "{}" format found.',
         'bad_out_format': 'No writer found to support "{}" format found.',
         'input_format_detected': 'Input format detected: {}.',
@@ -27,7 +30,14 @@ class Logger:
         'bad_config_formatting': 'Failed loading; {}',
         'missing_reader_param': 'The parameter "{}", required by the "{}" reader is not set. ' +
                                 'Set it under parameters, in the .yaml files.',
-        'done': 'Done.'
+        'done2': 'Done.',
+        'about': ''
+                 + '   _ _     _                 \n'
+                 + '|    | (_)   | |                \n'
+                 + '|    | |_  __| | __ _  ___ ___  \n'
+                 + '|    | | |/ _` |/ _` |/ __/ _ \ \n'
+                 + '|    | | | (_| | (_| | (_| (_) |\n'
+                 + '|    |_|_|\__,_|\__,_|\___\___/  v0.0.1\n'
     }
     verbose = False
     _debug = False

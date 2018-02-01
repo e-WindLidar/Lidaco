@@ -1,6 +1,6 @@
 parameters:
 
-  output_block_size: # accepts positive values and <nothing> (in the latter case, produces only one output file)
+#  output_block_size: # accepts positive values and <nothing> (in the latter case, produces only one output file)
 
 attributes:
 

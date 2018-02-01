@@ -1,20 +1,9 @@
 from os import path
-from .Utils import is_str, common_iterable
-from .Logger import Logger
+import os
+from ..common.Utils import is_str, common_iterable, to_dict
+from ..common.Logger import Logger
 from .ModuleLoader import ModuleLoader
 from .Config import Config
-
-
-class Arguments:
-    verbose = False
-    debug = False
-
-    def __init__(self, config_file=None, output_format=None, input_format=None, data_path=None, context=''):
-        self.config_file = config_file
-        self.output_format = output_format
-        self.input_format = input_format
-        self.data_path = data_path
-        self.context = context
 
 
 class Builder:
@@ -29,7 +18,13 @@ class Builder:
     configs = {}
     args = {}
 
-    def __init__(self, args=Arguments()):
+    def __init__(self,
+                 config_file=None,
+                 input_path=None,
+                 output_format=None,
+                 input_format=None,
+                 context='',
+                 ):
         """
         Initialization block. Loads a main config.yaml file, a reader, a writer and the remaining
         "meta-data" configurations. Overrides main configurations with the terminal arguments.
@@ -38,49 +33,66 @@ class Builder:
         :return: void
         """
 
-        self.args = args
-        context = self.params('context')
-
-        absolute_path = path.join(context, args.config_file)
+        absolute_path = path.join(context, config_file)
         import_dir_path = path.dirname(absolute_path)
         import_filename = path.basename(absolute_path)
 
-        self.configs = Config(import_dir_path, import_filename)
+        root_configs = {
+            'imports': [
+                import_filename
+            ],
+            'parameters': {
+                'input': {},
+                'output': {}
+            },
+        }
+
+        if input_path is not None:
+            root_configs['parameters']['input']['path'] = input_path
+
+        if input_format is not None:
+            root_configs['parameters']['input']['format'] = input_format
+
+        if output_format is not None:
+            root_configs['parameters']['output']['format'] = output_format
+
+        self.configs = Config(import_dir_path, configs=root_configs)
 
         try:
-            self.input_dir_path = path.join(context, self.params('data_path'))
+            self.input_dir_path = path.join(context, self.params('input', 'path'))
         except Exception as e:
             Logger.debug(e)
-            Logger.error('data_path_missing')
+            Logger.error('inp_path_missing')
 
         try:
-            self.module_loader.load_reader(self.params('input_format'))
-            Logger.info('input_format_detected', self.params('input_format'))
+            self.module_loader.load_reader(self.params('input', 'format'))
+            Logger.info('input_format_detected', self.params('input', 'format'))
+        except KeyError as e:
+            Logger.debug(e)
+            Logger.error('inp_format_missing')
         except Exception as e:
             Logger.debug(e)
-            Logger.error('bad_inp_format', self.params('input_format'))
+            Logger.error('bad_inp_format', self.params('input', 'format'))
 
         try:
-            self.module_loader.load_writer(self.params('output_format'))
-            Logger.info('output_format_detected', self.params('output_format'))
+            self.module_loader.load_writer(self.params('output', 'format'))
+            Logger.info('output_format_detected', self.params('output', 'format'))
+        except KeyError as e:
+            Logger.debug(e)
+            Logger.error('out_format_missing')
         except Exception as e:
             Logger.debug(e)
-            Logger.error('bad_out_format', self.params('output_format'))
+            Logger.error('bad_out_format', self.params('output', 'format'))
 
-    def params(self, key=None, default=None):
-        """
-        Retrieves a configuration parameter.
-        If the correspondent terminal argument is set, then the terminal argument is used.
-        :param key: parameters key.
-        :param default:
-        :return:
-        """
-        if key is None:
-            return self.configs['parameters']
-        elif hasattr(self.args, key) and getattr(self.args, key) is not None:
-            return getattr(self.args, key)
-        else:
-            return self.configs['parameters'].get(key, default)
+    def params(self, *keys):
+        # """
+        # Retrieves a configuration parameter.
+        # If the correspondent terminal argument is set, then the terminal argument is used.
+        # :param key: parameters key.
+        # :param default:
+        # :return:
+        # """
+        return self.configs.get('parameters', *keys)
 
     def read_attributes(self, dataset):
         """
@@ -103,32 +115,39 @@ class Builder:
         writer = None
         out_complete = ''
 
-        reader = self.module_loader.get_reader(self.params('input_format'))()
+        reader = self.module_loader.get_reader(self.params('input', 'format'))()
         reader.verify_parameters(self.params())
-        files = reader.fetch_input_files(path.join(self.params('context'), self.params('data_path')))
+        input_path = self.configs.get_resolved('parameters', 'input', 'path')
+        files = reader.fetch_input_files(input_path)
 
-        for key, file, i in common_iterable(files):
+        for i, group in enumerate(files):
 
-            is_first = (i == 0) if (self.params('output_block_size', 1) is None) \
-                else (i % self.params('output_block_size', 1) == 0)
+            obs = self.params('output_block_size') if self.configs.exists('parameters', 'output_block_size') else 1
+            if obs is None:
+                obs = len(files)
 
-            if is_first:
-                output_name = reader.output_filename(file if is_str(file) else key)
-                writer = self.module_loader.get_writer(self.params('output_format'))(self.input_dir_path, output_name)
+            first_of_batch = (i % obs == 0)
+
+            if first_of_batch:
+                output_name = reader.output_filename(group['id'])
+                writer = self.module_loader.get_writer(self.params('output', 'format'))(input_path, output_name)
                 out_complete = writer.file_path()
 
-            Logger.log('started_r_files', file if is_str(file) else tuple(file))
+            Logger.log('started_r_files', group['files'])
 
-            with writer.appending(not is_first) as dataset:
+            with writer.appending(not first_of_batch) as dataset:
+                Logger.log('writing_file', out_complete, '' if first_of_batch else '(appending)')
                 self.read_attributes(dataset)
 
-                if is_str(file):
-                    complete_path = path.join(self.input_dir_path, file)
-                    reader.read_to(dataset, complete_path, self.configs, index=i)
+                if reader.data_grouping:
+                    complete_path = tuple([path.join(input_path, f) for f in group['files']])
                 else:
-                    complete_paths = tuple([path.join(self.input_dir_path, f) for f in file])
-                    reader.read_to(dataset, complete_paths, self.configs, index=i)
-
-                Logger.log('writing_file', out_complete, '' if i == 0 else '(appending)')
+                    complete_path = path.join(input_path, group['files'])
+                reader.read_to(dataset, complete_path, self.configs, not first_of_batch)
 
         Logger.info('done')
+
+
+def quick_build(args):
+    builder = Builder(args)
+    builder.build()
