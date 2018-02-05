@@ -1,0 +1,29 @@
+parameters:
+
+  output_block_size: # accepts positive values and <nothing> (in the latter case, produces only one output file)
+  n_gates: 42
+  constant_gates: 'true'
+  range_gates: '30'
+  measurement_scenarios:
+    - scenario: 'INVALID'
+      type: -1
+      scans: '1-2'
+    - scenario: 'PPI'
+      type: 3
+      scans: '3-208;244-254'
+    - scenario: 'RHI'
+      type: 4
+      scans: '209-243'
+    - scenario: 'VAD'
+      type: 2
+      scans: '255-290'
+
+attributes:
+
+  # measurement configuration
+  n_gates_vary: 'false'
+  spatial_averaging_info: 'An FFT size of 64 and a the pulse length middle has been used.'
+  beam_sweeping: 'true'
+  n_lidars: '0'
+  linked_lidars: 'not applicable'
+  configuration_comment: 'FFT size, pulse length have to be verified.'
