@@ -97,7 +97,7 @@ class Galion(Reader):
     def required_params(self):
         return ['n_gates', 'range_gates', 'constant_gates', 'measurement_scenarios']
 
-    def read_to(self, output_dataset, input_filepath, configs, index):
+    def read_to(self, output_dataset, input_filepath, configs, appending):
         with open(input_filepath) as file:
             nr_gates = configs['parameters']['n_gates']
             range_gates = configs['parameters']['range_gates']
