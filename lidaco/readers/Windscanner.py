@@ -15,7 +15,7 @@ class Windscanner(Reader):
     def output_filename(self, timestamp):
         return timestamp
 
-    def read_to(self, output_dataset, input_filepaths, parameters, index):
+    def read_to(self, output_dataset, input_filepaths, parameters, appending):
         scanner_file, system_file, wind_file = input_filepaths
 
         with open(wind_file) as f:
@@ -31,7 +31,7 @@ class Windscanner(Reader):
         system_file_data = list(zip(*[row.strip().split(';') for row in system_file_data]))
         scanner_file_data = list(zip(*[row.strip().split(';') for row in scanner_file_data]))
 
-        if index == 0:
+        if not appending:
 
             index_columns = 4 - (len(wind_file_data) % 4)
             range_list = [float(row[0]) for row in wind_file_data[index_columns + 4::4]]

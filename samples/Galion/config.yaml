@@ -1,0 +1,10 @@
+imports:
+  - ./configs/device.yaml
+  - ./configs/scenario.yaml
+  - ./configs/metainfo.yaml
+
+parameters:
+  data_path: samples/Galion/
+  input_format: Galion
+  output_format: NetCDF4
+

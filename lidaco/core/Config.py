@@ -1,6 +1,6 @@
-from .Utils import dict_merge
-from .Logger import Logger
-from yaml import YAMLError, load
+from ..common.Utils import dict_merge, map_recursively
+from ..common.Logger import Logger
+from yaml import load
 from os import path
 
 
@@ -11,30 +11,28 @@ class Config:
 
     """
 
-    def __init__(self, dir_path, filename):
+    def __init__(self, context, file_name=None, configs={}):
         """
         Loads a configuration file and the declared imports in it recursively.
-        :param dir_path: file location path
-        :param filename: configuration filename
+        :param context: file location path
+        :param file_name: configuration filename
         """
-        self.data = {}
-        configs = {}
-        full_path = ""
+        self.configs = {}
+        self.config_paths = {}
+        self.context = context
 
-        try:
-            full_path = path.join(dir_path, filename)
-            with open(full_path, 'r') as stream:
-                configs = load(stream)
-            Logger.info('loading_config', full_path.replace("/./", "/"))
-        except FileNotFoundError as e:
-            Logger.error('bad_config_path', full_path.replace("/./", "/"))
-        except Exception as e:
-            Logger.error('bad_config_formatting', str(e))
+        tmp_configs = {}
 
-        if 'imports' in configs:
-            self.resolve_imports(dir_path, configs.pop('imports'))
+        if file_name:
+            tmp_configs = self.load_from_file(file_name)
 
-        self.merge(configs)
+        dict_merge(tmp_configs, configs)  # apply argument passed configs
+
+        if 'imports' in tmp_configs:
+            self.resolve_imports(context, tmp_configs.pop('imports'))
+
+        dict_merge(self.configs, tmp_configs)
+        dict_merge(self.config_paths, map_recursively(tmp_configs, context))
 
     def resolve_imports(self, dir_path, imports):
         """
@@ -49,7 +47,20 @@ class Config:
             import_filename = path.basename(absolute_path)
 
             config = Config(import_dir_path, import_filename)
-            self.merge(config.get())
+            dict_merge(self.configs, config.get())
+            dict_merge(self.config_paths, config.get_path())
+
+    def load_from_file(self, file_name):
+        full_path = ""
+        try:
+            full_path = path.join(self.context, file_name)
+            Logger.info('loading_config', full_path.replace("/./", "/"))
+            with open(full_path, 'r') as stream:
+                return load(stream)
+        except FileNotFoundError as e:
+            Logger.error('bad_config_path', full_path.replace("/./", "/"))
+        except Exception as e:
+            Logger.error('bad_config_formatting', str(e))
 
     def merge(self, config):
         """
@@ -58,21 +69,32 @@ class Config:
         :param config: other config structure
         :return:
         """
-        dict_merge(self.data, config)
+        dict_merge(self.configs, config)
 
-    def get(self, key=None, default=None):
+    def get(self, *keys):
+        keys = list(keys)
+        tmp_value = self.configs
+        while len(keys) > 0:
+            tmp_value = tmp_value[keys[0]]
+            keys.pop(0)
 
-        """
-        Similar to a regular .get(), with the exception that if no key is defined,
-        then all config data is returned.
-        :param key:
-        :param default:
-        :return: value
-        """
-        if key is None:
-            return self.data
-        else:
-            return self.data.get(key, default)
+        return tmp_value
+
+    def get_path(self, *keys):
+        keys = list(keys)
+        tmp_value = self.config_paths
+        while len(keys) > 0:
+            tmp_value = tmp_value[keys[0]]
+            keys.pop(0)
+
+        return tmp_value
+
+    def exists(self, *keys):
+        try:
+            self.get(*keys)
+            return True
+        except KeyError:
+            return False
 
     def __getitem__(self, key):
         """
@@ -80,7 +102,7 @@ class Config:
         :param key: key name
         :return: value
         """
-        return self.data[key]
+        return self.configs[key]
 
     def __contains__(self, key):
         """
@@ -88,4 +110,7 @@ class Config:
         :param key: key name
         :return: boolean
         """
-        return key in self.data
+        return key in self.configs
+
+    def get_resolved(self, *key):
+        return path.join(self.get_path(*key), self.get(*key))

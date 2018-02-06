@@ -37,7 +37,7 @@ class Windcubev2(Reader):
     def required_params(self):
         return ['position_x_input', 'position_y_input', 'position_z_input']
 
-    def read_to(self, output_dataset, input_filepath, configs, index):
+    def read_to(self, output_dataset, input_filepath, configs, appending):
 
         position_x_input = configs['parameters']['position_x_input']  # 9.212798  # must be set by the user
         position_y_input = configs['parameters']['position_y_input']  # 51.377882  # must be set by the user
