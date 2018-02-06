@@ -1,0 +1,10 @@
+{
+  "azimuth_angle": {
+    "name": "azimuth_angle",
+    "type": "f4",
+    "units": "degrees",
+    "description": "azimuth angle of the lidar beam at the start of the measurement, clockwise from north.",
+    "long_name": "azimuth_angle_of_lidar beam",
+    "comment": "Has no dimension in case of fixed azimuth"
+  }
+}

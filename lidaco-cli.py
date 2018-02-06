@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 from lidaco.core.Builder import Builder
-from lidaco.core.Logger import Logger
-from os import path
+from lidaco.common.Logger import Logger
 import argparse
 
 if __name__ == "__main__":

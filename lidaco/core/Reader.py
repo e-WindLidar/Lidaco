@@ -1,14 +1,15 @@
+import json
 from abc import ABC, abstractmethod
 from os import listdir
 from itertools import groupby
-from lidaco.common.Logger import Logger
-
+from ..common.Logger import Logger
 
 class Reader(ABC):
     """
     Specifies a reader class API and implements some common methods.
     """
 
+    common_variables = {}
     out_path = ''
 
     def __init__(self, data_grouping):
@@ -19,13 +20,16 @@ class Reader(ABC):
         super().__init__()
         self.data_grouping = data_grouping
 
-    def fetch_input_files( self, dir_path):
+    def fetch_input_files(self, dir_path):
         """
         Lists and filters input data files. If the reader specifies a group_by function,
         it also groups files by that value, return a dictionary group => [files].
         :param dir_path: directory containing input data files
         :return: [files] | {group => [files]}
         """
+        variables_file = open('variables.json')
+        variables_str = variables_file.read()
+        self.common_variables = json.loads(variables_str)[0]
         Logger.info('searching_in_path', dir_path)
         files = [f for f in listdir(dir_path) if self.accepts_file(f)]
         [Logger.info('found', f) for f in files]
@@ -99,3 +103,16 @@ class Reader(ABC):
         :return: group name e.g. 20161211135000
         """
         pass
+
+    def create_variable(self, dataset, var_name, dim_spec=None, data=None):
+        if data is None:
+            data = []
+
+        if var_name in self.common_variables:
+            var = self.common_variables.get(var_name)
+        else:
+            raise ValueError('The variable ' + var_name + ' doesn\'t exist in the dictionary.')
+
+        dim = var.dim if dim_spec is None else dim_spec
+        nc_variable = dataset.createVariable(var.name, var.type, dim)
+        return nc_variable
