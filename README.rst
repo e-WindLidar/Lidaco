@@ -1,16 +1,35 @@
-# Lidaco
+Lidaco
+########################################
 
 Wind **Li**dar **Da**ta **Co**nverter.
 
-### Usage
-```
-chmod +x ./lidaco-cli.py
-./lidaco-cli.py --config-file=samples/Windscanner/config.yaml
-./lidaco-cli.py --help
+Usage
+=============
 
-```
+Install
+-----
+.. code-block:: bash
+    pip install lidaco
+
+Run
+-----
+.. code-block:: bash
+    lidaco --config-file=samples/Windscanner/config.yaml
 
 
+Extending
+=============
+.. code-block:: python
+    # Create a new Reader or a Writer extending its correspondent base class
 
-### How to create a new reader/writer.
-Checkout: lidaco.core.Reader and lidaco.core.Writer
+.. code-block:: python
+    # Create one instance of that Reader and or Writer and pass it to the builder
+
+Contributing
+=============
+    Clone the development
+
+Send us feedback
+=============
+
+

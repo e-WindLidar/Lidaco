@@ -15,6 +15,7 @@ WORKDIR /usr/src/app
 #    chown ${uid}:${gid} -R /home/${uname}
 #USER python
 
+ENV PATH="/usr/src/app:${PATH}"
 
 RUN pip3.6 install netCDF4
 RUN pip3.6 install pyyaml
@@ -22,10 +23,9 @@ RUN pip3.6 install pyyaml
 # Required by the ncml writer
 RUN pip3.6 install lxml
 
+
 # Required by continuously run the converter during development
 # RUN pip3.6 install watchdog
-
-
 RUN apt update
 #RUN apt install -y netcdf-bin
 RUN apt install -y ncview
