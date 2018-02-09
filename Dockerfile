@@ -15,7 +15,7 @@ WORKDIR /usr/src/app
 #    chown ${uid}:${gid} -R /home/${uname}
 #USER python
 
-ENV PATH="/usr/src/app:${PATH}"
+ENV PYTHONPATH="/usr/src/app:${PYTHONPATH}"
 
 RUN pip3.6 install netCDF4
 RUN pip3.6 install pyyaml
