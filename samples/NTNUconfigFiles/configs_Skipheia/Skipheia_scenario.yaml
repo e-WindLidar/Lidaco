@@ -1,0 +1,11 @@
+parameters:
+
+  position_x_input: 8.3424397
+  position_y_input: 63.6663208
+  position_z_input: 20
+
+attributes:
+
+  # measurement configuration
+  spatial_averaging_info: "probe volume 26m"
+  beam_sweeping: 'false'

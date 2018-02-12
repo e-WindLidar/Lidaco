@@ -4,7 +4,9 @@ imports:
   - ./configs/metainfo.yaml
 
 parameters:
-  data_path: samples/Galion/
-  input_format: Galion
-  output_format: NetCDF4
+  input:
+    path: .
+    format: Galion
+  output:
+    format: NetCDF4
 

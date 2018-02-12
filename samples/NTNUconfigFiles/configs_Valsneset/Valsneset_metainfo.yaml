@@ -1,0 +1,11 @@
+attributes:
+
+  # general data set description
+  conventions: 'e-WindLidar'
+  version: '1.0'
+  title: 'Valsneset - Blaaster DL101 performance test'
+  creator: 'NTNU, Trondheim, Norway'
+  references: '-'
+  general_comment: 'Lidar dataset from Blaaster 3MW HAWT performance test'
+
+
