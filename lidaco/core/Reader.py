@@ -4,6 +4,7 @@ from os import listdir
 from itertools import groupby
 from ..common.Logger import Logger
 
+
 class Reader(ABC):
     """
     Specifies a reader class API and implements some common methods.
@@ -27,9 +28,10 @@ class Reader(ABC):
         :param dir_path: directory containing input data files
         :return: [files] | {group => [files]}
         """
-        variables_file = open('variables.json')
+        variables_file = open('./lidaco/core/variables.json')
         variables_str = variables_file.read()
-        self.common_variables = json.loads(variables_str)[0]
+        self.common_variables = json.loads(variables_str)
+
         Logger.info('searching_in_path', dir_path)
         files = [f for f in listdir(dir_path) if self.accepts_file(f)]
         [Logger.info('found', f) for f in files]
@@ -113,6 +115,16 @@ class Reader(ABC):
         else:
             raise ValueError('The variable ' + var_name + ' doesn\'t exist in the dictionary.')
 
-        dim = var.dim if dim_spec is None else dim_spec
-        nc_variable = dataset.createVariable(var.name, var.type, dim)
+        if dim_spec is not None:
+            nc_variable = dataset.createVariable(var['name'], var['type'], dim_spec)
+        elif 'dimensions' in var:
+            dimensions = var['dimensions']
+            print(tuple(dimensions))
+            nc_variable = dataset.createVariable(var['name'], var['type'], tuple(dimensions))
+        else:
+            nc_variable = dataset.createVariable(var['name'], var['type'])
+
+        nc_variable[:] = data
+        for key, value in var.items():
+            nc_variable.setncattr(key, value)
         return nc_variable

@@ -24,65 +24,6 @@ def process_time(timestamp):
     dt = datetime.datetime(int(y), int(m), int(d), int(h), int(min_), int(s), int(ms) * 1000)
     return dt.timestamp()
 
-
-def create_variables(group, azimuth, elevation, _yaw, _pitch, _roll, doppler, intensity):
-    # create the beam steering variables
-    # azimuth and elevation
-    azimuth_angle = group.createVariable('azimuth_angle', 'f4', 'time')
-    azimuth_angle.units = 'degrees'
-    azimuth_angle.long_name = 'azimuth_angle_of_lidar beam'
-    azimuth_angle[:] = azimuth
-    azimuth_angle.comment = ''
-    azimuth_angle.accuracy = ''
-    azimuth_angle.accuracy_info = ''
-
-    elevation_angle = group.createVariable('elevation_angle', 'f4', 'time')
-    elevation_angle.units = 'degrees'
-    elevation_angle.long_name = 'elevation_angle_of_lidar beam'
-    elevation_angle[:] = elevation
-    elevation_angle.comment = ''
-    elevation_angle.accuracy = ''
-    elevation_angle.accuracy_info = ''
-
-    # yaw, pitch, roll
-    yaw = group.createVariable('yaw', 'f4', 'time')
-    yaw.units = 'degrees'
-    yaw.long_name = 'lidar_yaw_angle'
-    yaw[:] = _yaw
-    yaw.comment = 'The home position of the lidar has been configured in a way that 0 azimuth corresponds to ' \
-                  'north. '
-    yaw.accuracy = ''
-
-    pitch = group.createVariable('pitch', 'f4', 'time')
-    pitch.units = 'degrees'
-    pitch.long_name = 'lidar_pitch_angle'
-    pitch[:] = _pitch
-    pitch.comment = ''
-    pitch.accuracy = ''
-    pitch.accuracy_info = 'No information on pitch accuracy available.'
-
-    roll = group.createVariable('roll', 'f4', 'time')
-    roll.units = 'degrees'
-    roll.long_name = 'lidar_roll_angle'
-    roll[:] = _roll
-    roll.comment = ''
-    roll.accuracy = ''
-    roll.accuracy_info = 'No information on roll accuracy available.'
-
-    # measurement variables
-    # TODO verify metadata
-    # Doppler and Intensity
-    DOPPLER = group.createVariable('DOPPLER', 'f4', ('time', 'range'))
-    DOPPLER.units = 'm.s-1'
-    DOPPLER.long_name = 'doppler'
-    DOPPLER[:] = doppler
-
-    INTENSITY = group.createVariable('INTENSITY', 'f4', ('time', 'range'))
-    INTENSITY.units = 'm.s-1'
-    INTENSITY.long_name = 'intensity'
-    INTENSITY[:] = intensity
-
-
 class Galion(Reader):
 
     def __init__(self):
@@ -139,18 +80,20 @@ class Galion(Reader):
             time[:] = np.array(list(map(lambda x: process_time(x) - start_time_seconds, timestamps)))
             time.comment = ''
 
-            # create the data variables
-            scan_type = output_dataset.createVariable('scan_type', 'i', 'time')
-            scan_type.units = 'none'
-            scan_type.long_name = 'scan_type_of_the_measurement'
+            # Data variables
+            scan_type = self.create_variable(output_dataset, "scan_type", "time")
+            scan_id = self.create_variable(output_dataset, "scan_id", "time")
 
-            scan_id = output_dataset.createVariable('scan_id', 'i', 'time')
-            scan_id.units = 'none'
-            scan_id.long_name = 'scan_id_of_the_measurement'
+            # Beam steering and location variables
+            self.create_variable(output_dataset, 'azimuth_angle', 'time', (scans[:, :, azimuth_index])[:, 0])
+            self.create_variable(output_dataset, 'elevation_angle', 'time', (scans[:, :, elevation_index])[:, 0])
+            self.create_variable(output_dataset, 'yaw', 'time', np.zeros(len(scans)))
+            self.create_variable(output_dataset, 'roll', 'time', (scans[:, :, roll_index])[:, 0])
+            self.create_variable(output_dataset, 'pitch', 'time', (scans[:, :, pitch_index])[:, 0])
 
-            create_variables(output_dataset, (scans[:, :, azimuth_index])[:, 0], (scans[:, :, elevation_index])[:, 0], np.zeros(len(scans)),
-                             (scans[:, :, pitch_index])[:, 0], (scans[:, :, roll_index])[:, 0],
-                             (scans[:, :, doppler_index]), (scans[:, :, intensity_index]))
+            # Measurement variables
+            self.create_variable(output_dataset, 'VEL', data=scans[:, :, doppler_index])
+            self.create_variable(output_dataset, 'INTENSITY', data=scans[:, :, intensity_index])
 
             invalid_scans = 0
             scan_index = 1
@@ -164,13 +107,13 @@ class Galion(Reader):
                         invalid_scans += int(ss.split('-')[1]) - int(ss.split('-')[0]) + 1
                 else:
                     scan_group = output_dataset.createGroup('scan_' + str(scan_index) + '_' + long_name)
-                    _azimuth = np.zeros(len(scans))
-                    _elevation = np.zeros(len(scans))
-                    _yaw = np.zeros(len(scans))
-                    _pitch = np.zeros(len(scans))
-                    _roll = np.zeros(len(scans))
-                    _doppler = np.zeros(shape=[len(scans), int(nr_gates)])
-                    _intensity = np.zeros(shape=[len(scans), int(nr_gates)])
+                    _azimuth = self.create_variable(scan_group, 'azimuth_angle', 'time', np.zeros(len(scans)))
+                    _elevation = self.create_variable(scan_group, 'elevation_angle', 'time', np.zeros(len(scans)))
+                    self.create_variable(scan_group, 'yaw', 'time', np.zeros(len(scans)))
+                    _pitch = self.create_variable(scan_group, 'pitch', 'time', np.zeros(len(scans)))
+                    _roll = self.create_variable(scan_group, 'roll', 'time', np.zeros(len(scans)))
+                    _doppler = self.create_variable(scan_group, 'VEL', data=np.zeros(shape=[len(scans), int(nr_gates)]))
+                    _intensity = self.create_variable(scan_group, 'INTENSITY', data=np.zeros(shape=[len(scans), int(nr_gates)]))
                     split_scans = records.split(';')
                     for ss in split_scans:
                         initial_index = int(ss.split('-')[0]) - (invalid_scans + 1)
@@ -183,5 +126,4 @@ class Galion(Reader):
                         _roll[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, roll_index][:, 0]
                         _doppler[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, doppler_index]
                         _intensity[initial_index:final_index + 1] = scans[initial_index:final_index + 1, :, intensity_index]
-                    create_variables(scan_group, _azimuth, _elevation, _yaw, _pitch, _roll, _doppler, _intensity)
                     scan_index += 1

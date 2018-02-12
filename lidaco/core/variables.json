@@ -1,10 +1,77 @@
 {
+  "scan_type": {
+    "name": "scan_type",
+    "type": "i",
+    "units": "none",
+    "description": "defines the scan type to which the data belongs",
+    "long_name": "scan_type_of_the_measurement",
+    "comment": "0:starring; 1:DBS; 2:VAD; 3:PPI; 4: RHI; 5:other"
+  },
+  "scan_id": {
+    "name": "scan_id",
+    "type": "i",
+    "units": "none",
+    "description": "defines the ID of the scan",
+    "long_name": "scan_id_of_the_measurement"
+  },
   "azimuth_angle": {
     "name": "azimuth_angle",
     "type": "f4",
     "units": "degrees",
-    "description": "azimuth angle of the lidar beam at the start of the measurement, clockwise from north.",
+    "description": "azimuth angle of the lidar beam at the start of the measurement, clockwise from north",
     "long_name": "azimuth_angle_of_lidar beam",
-    "comment": "Has no dimension in case of fixed azimuth"
+    "comment": "",
+    "accuracy": "",
+    "accuracy_info": ""
+  },
+  "elevation_angle": {
+    "name": "elevation_angle",
+    "type": "f4",
+    "units": "degrees",
+    "description": "elevation angle of the lidar beam from horizontal plane",
+    "long_name": "elevation_angle_of_lidar_beam",
+    "comment": "",
+    "accuracy": "",
+    "accuracy_info": ""
+  },
+  "yaw": {
+    "name": "yaw",
+    "type": "f4",
+    "units": "degrees",
+    "description": "yaw angle of the lidar device",
+    "long_name": "lidar_pitch_angle",
+    "comment": ""
+  },
+  "roll": {
+    "name": "roll",
+    "type": "f4",
+    "units": "degrees",
+    "description": "roll angle of the lidar device",
+    "long_name": "lidar_roll_angle",
+    "comment": ""
+  },
+  "pitch": {
+    "name": "pitch",
+    "type": "f4",
+    "units": "degrees",
+    "description": "pitch angle of the lidar device",
+    "long_name": "lidar_pitch_angle",
+    "comment": ""
+  },
+  "VEL": {
+    "name": "VEL",
+    "dimensions": ["time", "range"],
+    "type": "f4",
+    "units": "m.s-1",
+    "description": "radial velocity",
+    "long_name": "radial_velocity"
+  },
+  "INTENSITY": {
+    "name": "INTENSITY",
+    "dimensions": ["time", "range"],
+    "type": "f4",
+    "units": "m.s-1",
+    "description": "intensity of something",
+    "long_name": "intensity_of_something"
   }
 }
