@@ -1,4 +1,22 @@
 {
+  "time": {
+    "name": "time",
+    "dimensions": ["time"],
+    "type": "f4",
+    "long_name": "start_time_of_averaging_period",
+    "units": "seconds",
+    "comment": "",
+    "description": "time of the beginning of the averaging period in seconds since start of data file"
+  },
+  "range": {
+    "name": "range",
+    "dimensions": ["time", "range"],
+    "type": "f4",
+    "long_name": "range_gate_distance_from_lidar",
+    "units": "meters",
+    "comment": "",
+    "description": "distance of the center of the range gate form the position of the lidar"
+  },
   "scan_type": {
     "name": "scan_type",
     "type": "i",

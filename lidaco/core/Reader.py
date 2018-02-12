@@ -107,6 +107,15 @@ class Reader(ABC):
         pass
 
     def create_variable(self, dataset, var_name, dim_spec=None, data=None):
+        """
+        Creates a layer of abstraction to create a variable, by defining automatically the attributes using the
+        previously defined dictionary
+        :param dataset:
+        :param var_name:
+        :param dim_spec:
+        :param data:
+        :return:
+        """
         if data is None:
             data = []
 
@@ -119,7 +128,6 @@ class Reader(ABC):
             nc_variable = dataset.createVariable(var['name'], var['type'], dim_spec)
         elif 'dimensions' in var:
             dimensions = var['dimensions']
-            print(tuple(dimensions))
             nc_variable = dataset.createVariable(var['name'], var['type'], tuple(dimensions))
         else:
             nc_variable = dataset.createVariable(var['name'], var['type'])

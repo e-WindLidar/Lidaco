@@ -53,32 +53,25 @@ class Galion(Reader):
 
             scans = np.array(list(chunks([row.strip().split('\t') for row in data], int(nr_gates))))
 
-            # create the dimensions
+            # Dimensions
             output_dataset.createDimension('range', nr_gates)
             output_dataset.createDimension('time', len(scans))
 
-            # create the coordinate variables
-            # range
-            range1 = output_dataset.createVariable('range', 'f4', ('range',))
-            range1.units = 'm'
-            range1.long_name = 'range_gate_distance_from_lidar'
             if constant_gates:
-                range1[:] = np.full(nr_gates, float(range_gates))
+                range_values = np.full(nr_gates, float(range_gates))
             else:
-                range1[:] = np.array(range_gates.split(';')).astype(float)
-            range1.comment = ''
+                range_values = np.array(range_gates.split(';')).astype(float)
 
-            # time
-            time = output_dataset.createVariable('time', 'f4', ('time',))
-            time.units = 's'
+            timestamps = (scans[:, :, time_index])[:, 0]
             start_time_kv = metadata[4]
             start_time_str = start_time_kv[start_time_kv.find('\t') + 1:start_time_kv.find('\n')]
             start_time_seconds = process_time(start_time_str)
-            time.long_name = 'seconds since ' + start_time_str
-            # array manipulation to obtain timestamps
-            timestamps = (scans[:, :, time_index])[:, 0]
-            time[:] = np.array(list(map(lambda x: process_time(x) - start_time_seconds, timestamps)))
-            time.comment = ''
+            time_values = np.array(list(map(lambda x: process_time(x) - start_time_seconds, timestamps)))
+
+            # Coordinate variables
+            self.create_variable(output_dataset, "range", "range", range_values)
+            _time = self.create_variable(output_dataset, "time", data=time_values)
+            _time.long_name = 'seconds since ' + start_time_str
 
             # Data variables
             scan_type = self.create_variable(output_dataset, "scan_type", "time")
