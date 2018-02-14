@@ -1,4 +1,4 @@
-import json
+import yaml
 from abc import ABC, abstractmethod
 from os import listdir
 from itertools import groupby
@@ -28,9 +28,9 @@ class Reader(ABC):
         :param dir_path: directory containing input data files
         :return: [files] | {group => [files]}
         """
-        variables_file = open('./lidaco/core/variables.json')
+        variables_file = open('./lidaco/core/variables.yaml')
         variables_str = variables_file.read()
-        self.common_variables = json.loads(variables_str)
+        self.common_variables = yaml.load(variables_str)
 
         Logger.info('searching_in_path', dir_path)
         files = [f for f in listdir(dir_path) if self.accepts_file(f)]
