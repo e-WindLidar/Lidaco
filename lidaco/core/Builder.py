@@ -1,5 +1,10 @@
 from os import path
 import os
+
+from lidaco.core.Writer import Writer
+
+from lidaco.core.Reader import Reader
+
 from ..common.Utils import is_str, common_iterable, to_dict
 from ..common.Logger import Logger
 from .ModuleLoader import ModuleLoader
@@ -64,25 +69,33 @@ class Builder:
             Logger.debug(e)
             Logger.error('inp_path_missing')
 
-        try:
-            self.module_loader.load_reader(self.params('input', 'format'))
-            Logger.info('input_format_detected', self.params('input', 'format'))
-        except KeyError as e:
-            Logger.debug(e)
-            Logger.error('inp_format_missing')
-        except Exception as e:
-            Logger.debug(e)
-            Logger.error('bad_inp_format', self.params('input', 'format'))
+        reader = self.params('input', 'format')
+        if not is_str(reader) and issubclass(reader, Reader):
+            self.module_loader.set_reader(reader)
+        else:
+            try:
+                self.module_loader.load_reader(reader)
+                Logger.info('input_format_detected', self.params('input', 'format'))
+            except KeyError as e:
+                Logger.debug(e)
+                Logger.error('inp_format_missing')
+            except Exception as e:
+                Logger.debug(e)
+                Logger.error('bad_inp_format', self.params('input', 'format'))
 
-        try:
-            self.module_loader.load_writer(self.params('output', 'format'))
-            Logger.info('output_format_detected', self.params('output', 'format'))
-        except KeyError as e:
-            Logger.debug(e)
-            Logger.error('out_format_missing')
-        except Exception as e:
-            Logger.debug(e)
-            Logger.error('bad_out_format', self.params('output', 'format'))
+        writer = self.params('output', 'format')
+        if not is_str(writer) and issubclass(writer, Writer):
+            self.module_loader.set_writer(writer)
+        else:
+            try:
+                self.module_loader.load_writer(writer)
+                Logger.info('output_format_detected', self.params('output', 'format'))
+            except KeyError as e:
+                Logger.debug(e)
+                Logger.error('out_format_missing')
+            except Exception as e:
+                Logger.debug(e)
+                Logger.error('bad_out_format', self.params('output', 'format'))
 
     def params(self, *keys):
         # """
@@ -115,7 +128,7 @@ class Builder:
         writer = None
         out_complete = ''
 
-        reader = self.module_loader.get_reader(self.params('input', 'format'))()
+        reader = self.module_loader.get_reader()()
         reader.verify_parameters(self.params())
         input_path = self.configs.get_resolved('parameters', 'input', 'path')
         files = reader.fetch_input_files(input_path)
@@ -130,7 +143,7 @@ class Builder:
 
             if first_of_batch:
                 output_name = reader.output_filename(group['id'])
-                writer = self.module_loader.get_writer(self.params('output', 'format'))(input_path, output_name)
+                writer = self.module_loader.get_writer()(input_path, output_name)
                 out_complete = writer.file_path()
 
             Logger.log('started_r_files', group['files'])

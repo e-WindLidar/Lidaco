@@ -6,11 +6,10 @@ class ModuleLoader:
     Dynamically handles "add-on" modules (readers and writers) loading.
     """
 
-    reader_modules = {}
-    writer_modules = {}
-
     def __init__(self):
         super().__init__()
+        self.reader_module = None
+        self.writer_module = None
 
     @staticmethod
     def load(path, name):
@@ -30,7 +29,7 @@ class ModuleLoader:
         :param name: reader name
         :return: void
         """
-        self.reader_modules[name] = self.load('..readers.', name)
+        self.reader_module = self.load('..readers.', name)
 
     def load_writer(self, name):
         """
@@ -38,20 +37,25 @@ class ModuleLoader:
         :param name: writer name
         :return: void
         """
-        self.writer_modules[name] = self.load('..writers.', name)
+        self.writer_module = self.load('..writers.', name)
 
-    def get_reader(self, name):
+    def get_reader(self):
         """
-        Returns a reader class.
-        :param name: reader name
+        Returns the reader class.
         :return: class reference
         """
-        return self.reader_modules[name]
+        return self.reader_module
 
-    def get_writer(self, name):
+    def get_writer(self):
         """
-        Returns a writer class.
-        :param name: writer name
+        Returns the writer class.
         :return: class reference
         """
-        return self.writer_modules[name]
+        return self.writer_module
+
+
+    def set_reader(self, reader):
+        self.reader_module = reader
+
+    def set_writer(self, writer):
+        self.writer_module = writer
