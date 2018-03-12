@@ -35,13 +35,14 @@ class Windcubev2(Reader):
         return filename[:-4]
 
     def required_params(self):
-        return ['position_x_input', 'position_y_input', 'position_z_input']
+        return {
+            'position': ['x', 'y', 'z']
+        }
 
     def read_to(self, output_dataset, input_filepath, configs, appending):
-
-        position_x_input = configs['parameters']['position_x_input']  # 9.212798  # must be set by the user
-        position_y_input = configs['parameters']['position_y_input']  # 51.377882  # must be set by the user
-        position_z_input = configs['parameters']['position_z_input']  # 255  # must be set by the user
+        position_x_input = configs['parameters']['position']['x']
+        position_y_input = configs['parameters']['position']['y']
+        position_z_input = configs['parameters']['position']['z']
 
         # read file
         with open(input_filepath, encoding='latin-1') as f:

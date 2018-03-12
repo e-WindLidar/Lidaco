@@ -15,8 +15,19 @@ class Windscanner(Reader):
     def output_filename(self, timestamp):
         return timestamp
 
-    def read_to(self, output_dataset, input_filepaths, parameters, appending):
+    def required_params(self):
+        return {
+            'position': ['x', 'y', 'z']
+        }
+
+    def read_to(self, output_dataset, input_filepaths, configs, appending):
         scanner_file, system_file, wind_file = input_filepaths
+
+        x = configs['parameters']['position']['x']
+        y = configs['parameters']['position']['y']
+        z = configs['parameters']['position']['z']
+
+
 
         with open(wind_file) as f:
             wind_file_data = f.readlines()
@@ -120,7 +131,7 @@ class Windscanner(Reader):
             position_x.units = 'm'
             position_x.long_name = 'x_position_of_lidar'
             position_x.comment = 'Measured by GPS. Coordinates are UTM 32 N.'
-            position_x[:] = 511641
+            position_x[:] = x
             position_x.accuracy = '<1m'
             position_x.accuracy_info = 'Coordinates taken by a hand-held Garmin GPS device.'
 
@@ -128,7 +139,7 @@ class Windscanner(Reader):
             position_y.units = 'm'
             position_y.long_name = 'y_position_of_lidar'
             position_y.comment = 'Measured by GPS. Coordinates are UTM 32 N.'
-            position_y[:] = 5687591
+            position_y[:] = y
             position_y.accuracy = '<1m'
             position_y.accuracy_info = 'Coordinates taken by a hand-held Garmin GPS device.'
 
@@ -136,7 +147,7 @@ class Windscanner(Reader):
             position_z.units = 'meters'
             position_z.long_name = 'z_position_of_lidar'
             position_z.comment = 'Taken from a digital elevation model for the measured x,y position.'
-            position_z[:] = 260.8
+            position_z[:] = z
             position_z.accuracy = '<1m'
             position_z.accuracy_info = 'The digital elevation model was prepared under the use of airborne lidar data and verified against a federal digital elevation model.'
 

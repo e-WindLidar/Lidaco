@@ -2,6 +2,11 @@ parameters:
 
 #  output_block_size: # accepts positive values and <nothing> (in the latter case, produces only one output file)
 
+  position:
+    x: 9.212798
+    y: 51.377882
+    z: 25
+
 attributes:
 
   # measurement configuration

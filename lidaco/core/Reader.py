@@ -18,8 +18,9 @@ class Reader(ABC):
         """
         super().__init__()
         self.data_grouping = data_grouping
+        self.configs = None
 
-    def fetch_input_files( self, dir_path):
+    def fetch_input_files(self, dir_path):
         """
         Lists and filters input data files. If the reader specifies a group_by function,
         it also groups files by that value, return a dictionary group => [files].
@@ -74,10 +75,21 @@ class Reader(ABC):
         """
         return []
 
-    def verify_parameters(self, params):
-        for param in self.required_params():
-            if param not in params:
-                Logger.error('missing_reader_param', param, type(self).__name__)
+    def verify_parameters(self):
+        def verify_block(block, path):
+                if type(block) == dict :
+                    for k, value in block.items():
+                        verify_block(value, path + [k])
+                elif type(block) == list:
+                    for value in block:
+                        verify_block(value, path)
+                else:
+                    args = path + [block]
+                    try:
+                        self.configs.get(*args)
+                    except Exception as e:
+                        Logger.error('missing_reader_param', '/'.join(args), type(self).__name__)
+        verify_block(self.required_params(), ['parameters'])
 
     @abstractmethod
     def read_to(self, output_dataset, input, configurations, index):
@@ -99,3 +111,9 @@ class Reader(ABC):
         :return: group name e.g. 20161211135000
         """
         pass
+
+    def config(self, *keys):
+        return self.configs.get('parameters', *keys)
+
+    def set_configs(self, configs):
+        self.configs = configs

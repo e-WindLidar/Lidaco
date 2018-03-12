@@ -1,11 +1,10 @@
 from os import path
-import os
 
 from lidaco.core.Writer import Writer
 
 from lidaco.core.Reader import Reader
 
-from ..common.Utils import is_str, common_iterable, to_dict
+from ..common.Utils import is_str
 from ..common.Logger import Logger
 from .ModuleLoader import ModuleLoader
 from .Config import Config
@@ -81,7 +80,7 @@ class Builder:
                 Logger.error('inp_format_missing')
             except Exception as e:
                 Logger.debug(e)
-                Logger.error('bad_inp_format', self.params('input', 'format'))
+                Logger.error('bad_inp_format', self.params('input', 'format'), str(e))
 
         writer = self.params('output', 'format')
         if not is_str(writer) and issubclass(writer, Writer):
@@ -95,16 +94,9 @@ class Builder:
                 Logger.error('out_format_missing')
             except Exception as e:
                 Logger.debug(e)
-                Logger.error('bad_out_format', self.params('output', 'format'))
+                Logger.error('bad_out_format', self.params('output', 'format'), str(e))
 
     def params(self, *keys):
-        # """
-        # Retrieves a configuration parameter.
-        # If the correspondent terminal argument is set, then the terminal argument is used.
-        # :param key: parameters key.
-        # :param default:
-        # :return:
-        # """
         return self.configs.get('parameters', *keys)
 
     def read_attributes(self, dataset):
@@ -129,7 +121,8 @@ class Builder:
         out_complete = ''
 
         reader = self.module_loader.get_reader()()
-        reader.verify_parameters(self.params())
+        reader.set_configs(self.configs)
+        reader.verify_parameters()
         input_path = self.configs.get_resolved('parameters', 'input', 'path')
         files = reader.fetch_input_files(input_path)
 
