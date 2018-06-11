@@ -1,10 +1,6 @@
 from os import path
-
-from lidaco.core.Writer import Writer
-
-from lidaco.core.Reader import Reader
-
-from ..common.Utils import is_str
+import os
+from ..common.Utils import is_str, common_iterable, to_dict
 from ..common.Logger import Logger
 from .ModuleLoader import ModuleLoader
 from .Config import Config
@@ -29,6 +25,7 @@ class Builder:
                  input_format=None,
                  context='',
                  ):
+        
         """
         Initialization block. Loads a main config.yaml file, a reader, a writer and the remaining
         "meta-data" configurations. Overrides main configurations with the terminal arguments.
@@ -68,35 +65,34 @@ class Builder:
             Logger.debug(e)
             Logger.error('inp_path_missing')
 
-        reader = self.params('input', 'format')
-        if not is_str(reader) and issubclass(reader, Reader):
-            self.module_loader.set_reader(reader)
-        else:
-            try:
-                self.module_loader.load_reader(reader)
-                Logger.info('input_format_detected', self.params('input', 'format'))
-            except KeyError as e:
-                Logger.debug(e)
-                Logger.error('inp_format_missing')
-            except Exception as e:
-                Logger.debug(e)
-                Logger.error('bad_inp_format', self.params('input', 'format'), str(e))
+        try:
+            self.module_loader.load_reader(self.params('input', 'format'))
+            Logger.info('input_format_detected', self.params('input', 'format'))
+        except KeyError as e:
+            Logger.debug(e)
+            Logger.error('inp_format_missing')
+        except Exception as e:
+            Logger.debug(e)
+            Logger.error('bad_inp_format', self.params('input', 'format'))
 
-        writer = self.params('output', 'format')
-        if not is_str(writer) and issubclass(writer, Writer):
-            self.module_loader.set_writer(writer)
-        else:
-            try:
-                self.module_loader.load_writer(writer)
-                Logger.info('output_format_detected', self.params('output', 'format'))
-            except KeyError as e:
-                Logger.debug(e)
-                Logger.error('out_format_missing')
-            except Exception as e:
-                Logger.debug(e)
-                Logger.error('bad_out_format', self.params('output', 'format'), str(e))
+        try:
+            self.module_loader.load_writer(self.params('output', 'format'))
+            Logger.info('output_format_detected', self.params('output', 'format'))
+        except KeyError as e:
+            Logger.debug(e)
+            Logger.error('out_format_missing')
+        except Exception as e:
+            Logger.debug(e)
+            Logger.error('bad_out_format', self.params('output', 'format'))
 
     def params(self, *keys):
+        # """
+        # Retrieves a configuration parameter.
+        # If the correspondent terminal argument is set, then the terminal argument is used.
+        # :param key: parameters key.
+        # :param default:
+        # :return:
+        # """
         return self.configs.get('parameters', *keys)
 
     def read_attributes(self, dataset):
@@ -110,6 +106,24 @@ class Builder:
             for key, value in self.configs['attributes'].items():
                 setattr(dataset, key, value)
 
+
+    def read_variables(self, dataset):
+        """
+        Reads variables into the dataset. The variables should be specified in the .yaml configuration
+        files under 'variables:' key.
+        :param dataset: a core data model / netcdf4 dataset object.
+        :return: void
+        """
+        if 'variables' in self.configs:
+            for variable_name, variable_dict in self.configs['variables'].items():
+                if variable_name not in dataset.variables:
+                    temp_var = dataset.createVariable(variable_name, self.configs['variables'][variable_name]['data_type'])
+                    temp_var[:] = self.configs['variables'][variable_name]['value']
+                    
+                    for key, value in variable_dict.items():
+                        if (key != 'data_type') or (key != 'value'):
+                            setattr(dataset, variable_name + '.' + key, value)
+
     def build(self):
         """
         Main loop - connects the reader with the writer.
@@ -120,11 +134,11 @@ class Builder:
         writer = None
         out_complete = ''
 
-        reader = self.module_loader.get_reader()()
-        reader.set_configs(self.configs)
-        reader.verify_parameters()
+        reader = self.module_loader.get_reader(self.params('input', 'format'))()
+        reader.verify_parameters(self.params())
         input_path = self.configs.get_resolved('parameters', 'input', 'path')
         files = reader.fetch_input_files(input_path)
+
 
         for i, group in enumerate(files):
 
@@ -136,15 +150,18 @@ class Builder:
 
             if first_of_batch:
                 output_name = reader.output_filename(group['id'])
-                writer = self.module_loader.get_writer()(input_path, output_name)
+                writer = self.module_loader.get_writer(self.params('output', 'format'))(input_path, output_name)
                 out_complete = writer.file_path()
+
 
             Logger.log('started_r_files', group['files'])
 
             with writer.appending(not first_of_batch) as dataset:
                 Logger.log('writing_file', out_complete, '' if first_of_batch else '(appending)')
+                
                 self.read_attributes(dataset)
-
+                self.read_variables(dataset)
+                
                 if reader.data_grouping:
                     complete_path = tuple([path.join(input_path, f) for f in group['files']])
                 else:
