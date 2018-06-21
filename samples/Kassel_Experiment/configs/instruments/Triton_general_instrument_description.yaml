@@ -1,0 +1,12 @@
+attributes:
+
+  # general instrument description
+  lidar_technology: 'sodar'
+  lidar_scanning_type: 'vertical profiling'
+  lidar_range_classification: 'short'
+  lidar_installation_type: 'ground_based'
+  product_name: 'Vaisala Triton Sodar'
+  lidar_is_mobile: 'false'
+  lidar_orientation: 'not applicable'
+  flow_direction_encoding: 'not applicable'
+  

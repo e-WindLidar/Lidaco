@@ -1,0 +1,14 @@
+attributes:
+
+  # general data set description
+  conventions: 'e-WindLidar'
+  version: '1.0'
+  title: 'NEWA Kassel Experiment'
+  creator: 'Tobias Klaas, Fraunhofer IEE, Kassel, Germany; Nikola Vasiljevic, DTU Wind, Roskile, Denmark; Stephan Voß, Forwind, Oldenburg, Germany'
+  references: 'Paul Kuehn et al.: Experiment Documentation. NEWA Forested Hill Experiment Kassel. Technical Report, Fraunhofer IEE, Kassel 2018.'
+  site: 'Roedeser Berg, Kassel, Germany'
+  general_comment: 'Data set version 1.00'
+
+  # data description
+  data_processing_history: ''
+

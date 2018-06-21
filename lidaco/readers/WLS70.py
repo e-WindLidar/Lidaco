@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri May 18 11:08:35 2018
-
-@author: skulla
-"""
-
 from ..core.Reader import Reader
 from datetime import datetime
 import numpy as np

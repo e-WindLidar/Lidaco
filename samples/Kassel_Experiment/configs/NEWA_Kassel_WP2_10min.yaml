@@ -1,0 +1,46 @@
+imports: # read in order
+  - ./general/NEWA_Kassel_general_dataset.yaml
+  - ./instruments/Triton_general_instrument_description.yaml
+  - ./processing/NEWA_Kassel_data_processing_history.yaml
+
+attributes:
+
+  # specific device description
+  serial_number: '#358'
+  specific_lidar_name: ''
+  specific_lidar_owner: 'innogy SE'
+  specific_lidar_operator: 'innogy SE'
+  instrument_comment: 'The installation site ID of this instrument is WP2, compare experiment documentation report. It was installed north-west of MM140.'
+  
+  # specific measurement configuration
+  configuration_comment: ''
+
+  
+variables:   
+  position_x:
+    data_type: 'f4'
+    units: 'degrees east'
+    long_name: 'x_position_of_lidar'
+    value: 509942
+
+  position_y:
+    data_type: 'f4'
+    units: 'degrees north'
+    long_name: 'y_position_of_lidar'
+    value: 5690646
+
+  position_z:
+    data_type: 'f4'
+    units: 'meters'
+    long_name: 'z_position_of_lidar'
+    value: 249.8 
+
+	
+parameters:
+  # output_block_size:
+  input:
+    path: C:\
+    format: Triton
+  output:
+    path: .\converted
+    format: NetCDF4

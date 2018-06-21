@@ -1,0 +1,85 @@
+imports: # read in order
+  - ./general/NEWA_Kassel_general_dataset.yaml
+  - ./instruments/WLS200S_general_instrument_description.yaml
+  - ./processing/NEWA_Kassel_data_processing_history.yaml
+
+attributes:
+
+  # specific device description
+  serial_number: '#07'
+  specific_lidar_name: 'Koshava'
+  specific_lidar_owner: 'DTU Wind'
+  specific_lidar_operator: 'DTU Wind'
+  instrument_comment: 'The installation site ID of this instrument is WS8, compare experiment documentation report. It was installed NE of the Roedeser Berg.'
+  
+  # specific measurement configuration
+  n_gates_vary: 'false'
+  spatial_averaging_info: 'An FFT size of 128 and a the pulse length long has been used.'
+  beam_sweeping: 'false'
+  measurement_scenario: 'Complex trajectory scan at several virtual mast locations at the north-eastern part of the flow line. For more details see experiment documentation report.'
+  n_lidars: '1'
+  linked_lidars: '#59, WS7'
+  configuration_comment: 'Accumulation time is constant 1000ms'
+
+  accumulation_time: 1
+  
+variables:
+  yaw:
+    data_type: 'f4' #f4 = float (f8 = double)
+    units: 'degrees'
+    long_name: 'lidar_yaw_angle'
+    comment: 'The home position of the lidar has been configured in a way that 0 azimuth corresponds to north.'
+    accuracy: ''
+    accuracy_info: 'No information on yaw accuracy available.'
+    value: 0
+
+  pitch:
+    data_type: 'f4'
+    units: 'degrees'
+    long_name: 'lidar_pitch_angle'
+    comment: ''
+    accuracy: ''
+    accuracy_info: 'No information on pitch accuracy available.'
+    value: 0
+
+  roll:
+    data_type: 'f4'
+    units: 'degrees'
+    long_name: 'lidar_roll_angle'
+    comment: ''
+    accuracy: ''
+    accuracy_info: 'No information on roll accuracy available.'
+    value: 0
+
+  scan_id:
+    data_type: 'i' #i = integer
+    units: 'none'
+    long_name: 'scan_id_of_the_measurement'
+    value: 1
+    
+  position_x:
+    data_type: 'f4'
+    units: 'degrees east'
+    long_name: 'x_position_of_lidar'
+    value: 517029.65
+    
+  position_y:
+    data_type: 'f4'
+    units: 'degrees north'
+    long_name: 'y_position_of_lidar'
+    value: 5690931.40
+
+  position_z:
+    data_type: 'f4'
+    units: 'meters'
+    long_name: 'z_position_of_lidar'
+    value: 315.7
+	
+parameters:
+  output_block_size: 100
+  input:
+    path: F:\NEWA\WindScanner_sorted\Koshava\HMD\HMD_Config_2_Long
+    format: Windscanner
+  output:
+    path: F:\NEWA\WindScanner_sorted\Koshava\HMD\HMD_Config_2_Long
+    format: NetCDF4
