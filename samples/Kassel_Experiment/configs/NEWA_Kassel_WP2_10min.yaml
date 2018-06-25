@@ -39,7 +39,7 @@ variables:
 parameters:
   # output_block_size:
   input:
-    path: C:\
+    path: ..\data\WP2\
     format: Triton
   output:
     path: .\converted

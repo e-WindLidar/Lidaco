@@ -75,12 +75,12 @@ variables:
     units: 'meters'
     long_name: 'z_position_of_lidar'
     value: 287.4
-	
+
 parameters:
   output_block_size: 100
   input:
-    path: F:\NEWA\WindScanner_sorted\Scirocco\HMD\HMD_Config_1_Long\
+    path: ..\data\WS4\
     format: Windscanner
   output:
-    path: F:\NEWA\WindScanner_sorted\Scirocco\HMD\HMD_Config_1_Long\
+    path: ..\data\WS4\
     format: NetCDF4

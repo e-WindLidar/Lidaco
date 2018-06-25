@@ -80,7 +80,7 @@ variables:
 parameters:
   output_block_size: # accepts positive values and <nothing> (in the latter case, produces only one output file)
   input:
-    path: C:\
+    path: ..\data\WP6\
     format: WLS70
   output:
     path: .\converted

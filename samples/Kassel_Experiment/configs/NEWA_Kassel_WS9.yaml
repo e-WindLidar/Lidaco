@@ -74,12 +74,12 @@ variables:
     units: 'meters'
     long_name: 'z_position_of_lidar'
     value: 278.1
-	
+
 parameters:
   output_block_size: 100
   input:
-    path: F:\NEWA\WindScanner_sorted\OLD17\PPI\PPI_Config_5_Long
+    path: ..\data\WS9\
     format: Windscanner
   output:
-    path: F:\NEWA\WindScanner_sorted\OLD17\PPI\PPI_Config_5_Long
+    path: ..\data\WS9\
     format: NetCDF4

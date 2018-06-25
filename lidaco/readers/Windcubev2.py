@@ -246,5 +246,3 @@ class Windcubev2(Reader):
                 output_dataset.variables['CNRmin'][:, :] = [[float(value) for value in row[15::12]] for row in data_timeseries]				
                 output_dataset.variables['WIDTH'][:, :] = [[float(value) for value in row[16::12]] for row in data_timeseries]
                 output_dataset.variables['Availability'][:, :] = [[float(value) for value in row[17::12]] for row in data_timeseries]
-                
-        

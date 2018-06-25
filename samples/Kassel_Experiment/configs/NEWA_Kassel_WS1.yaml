@@ -79,8 +79,8 @@ variables:
 parameters:
   output_block_size: # accepts positive values and <nothing> (in the latter case, produces only one output file)
   input:
-    path: F:\NEWA\WindScanner_sorted\Vara\RHI\RHI_Config_9_Long\
+    path: ..\data\WS1\
     format: Windscanner
   output:
-    path: F:\NEWA\WindScanner_sorted\Vara\RHI\RHI_Config_9_Long\
+    path: ..\data\WS1\
     format: NetCDF4

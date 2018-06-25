@@ -48,7 +48,7 @@ variables:
 parameters:
   # output_block_size: 
   input:
-    path: C:\
+    path: ..\data\WP4\10min
     format: ZephIR300
   output:
     path: .\converted

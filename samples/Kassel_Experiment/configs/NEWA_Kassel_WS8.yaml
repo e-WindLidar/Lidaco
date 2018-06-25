@@ -74,12 +74,12 @@ variables:
     units: 'meters'
     long_name: 'z_position_of_lidar'
     value: 315.7
-	
+
 parameters:
   output_block_size: 100
   input:
-    path: F:\NEWA\WindScanner_sorted\Koshava\HMD\HMD_Config_2_Long
+    path: ..\data\WS8\
     format: Windscanner
   output:
-    path: F:\NEWA\WindScanner_sorted\Koshava\HMD\HMD_Config_2_Long
+    path: ..\data\WS8\
     format: NetCDF4

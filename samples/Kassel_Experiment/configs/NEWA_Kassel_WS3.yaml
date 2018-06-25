@@ -79,8 +79,8 @@ variables:
 parameters:
   output_block_size: 100
   input:
-    path: F:\NEWA\WindScanner_sorted\WS3_WLS200S-57-IWES\PPI\PPI_Config_41_Long
+    path: ..\data\WS3\
     format: Windscanner
   output:
-    path: F:\NEWA\WindScanner_sorted\WS3_WLS200S-57-IWES\PPI\PPI_Config_41_Long
+    path: ..\data\WS3\
     format: NetCDF4
