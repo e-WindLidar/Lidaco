@@ -189,6 +189,6 @@ class Windscanner(Reader):
             output_dataset.variables['VEL'][ntime:, :] = list(
                 zip(*[[float(value) for value in row] for row in wind_file_data[index_columns + 5::4]]))
             output_dataset.variables['WIDTH'][ntime:, :] = list(
-                zip(*[[float(value) for value in row] for row in wind_file_data[index_columns + 6::4]]))
-            output_dataset.variables['CNR'][ntime:, :] = list(
                 zip(*[[float(value) for value in row] for row in wind_file_data[index_columns + 7::4]]))
+            output_dataset.variables['CNR'][ntime:, :] = list(
+                zip(*[[float(value) for value in row] for row in wind_file_data[index_columns + 6::4]]))
