@@ -158,9 +158,9 @@ class Windscanner(Reader):
             output_dataset.variables['VEL'][:, :] = list(
                 zip(*[[float(value) for value in row] for row in wind_file_data[index_columns + 5::4]]))
             output_dataset.variables['WIDTH'][:, :] = list(
-                zip(*[[float(value) for value in row] for row in wind_file_data[index_columns + 6::4]]))
-            output_dataset.variables['CNR'][:, :] = list(
                 zip(*[[float(value) for value in row] for row in wind_file_data[index_columns + 7::4]]))
+            output_dataset.variables['CNR'][:, :] = list(
+                zip(*[[float(value) for value in row] for row in wind_file_data[index_columns + 6::4]]))
             
         #%% case appending
         else: 
