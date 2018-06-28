@@ -109,6 +109,24 @@ class Builder:
         if 'attributes' in self.configs:
             for key, value in self.configs['attributes'].items():
                 setattr(dataset, key, value)
+                
+    def read_variables(self, dataset):
+        """
+        Reads variables into the dataset. The variables should be specified in the .yaml configuration
+        files under 'variables:' key.
+        :param dataset: a core data model / netcdf4 dataset object.
+        :return: void
+        """
+        if 'variables' in self.configs:
+            for variable_name, variable_dict in self.configs['variables'].items():
+                if variable_name not in dataset.variables:
+                    temp_var = dataset.createVariable(variable_name, self.configs['variables'][variable_name]['data_type'])
+                    temp_var[:] = self.configs['variables'][variable_name]['value']
+                    
+                    for key, value in variable_dict.items():
+                        if (key != 'data_type') and (key != 'value'):
+                            setattr(temp_var, key, value)
+
 
     def build(self):
         """
@@ -143,8 +161,10 @@ class Builder:
 
             with writer.appending(not first_of_batch) as dataset:
                 Logger.log('writing_file', out_complete, '' if first_of_batch else '(appending)')
+                
                 self.read_attributes(dataset)
-
+                self.read_variables(dataset)
+                
                 if reader.data_grouping:
                     complete_path = tuple([path.join(input_path, f) for f in group['files']])
                 else:
