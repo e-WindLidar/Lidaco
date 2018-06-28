@@ -1,12 +1,11 @@
-#!/usr/bin/env python
-
-from lidaco.core.Builder import Builder
-from lidaco.common.Logger import Logger
+from .core.Builder import Builder
+from .common.Logger import Logger
 
 from os import path
 import argparse
 
-if __name__ == "__main__":
+
+def main():
     """
         Converter command entry point.
     """
