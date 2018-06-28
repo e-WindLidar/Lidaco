@@ -94,7 +94,7 @@ variables:
 Lidaco configuration system is built to motivate the configurations reusability, so each config file can import others. With this mechanism you can to split your configurations into devices, scenarios, campaigns and so on.
 In case of collision, each the file that specify a certain config, overrides the further imported ones.
 
-```
+```yaml
 imports: # read in order
   - ./general/NEWA_Kassel_general_dataset.yaml
   - ./instruments/Windcubev2_general_instrument_description.yaml
