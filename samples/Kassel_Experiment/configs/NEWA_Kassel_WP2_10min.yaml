@@ -19,13 +19,13 @@ attributes:
 variables:   
   position_x:
     data_type: 'f4'
-    units: 'degrees east'
+    units: 'meters'
     long_name: 'x_position_of_lidar'
     value: 509942
 
   position_y:
     data_type: 'f4'
-    units: 'degrees north'
+    units: 'meters'
     long_name: 'y_position_of_lidar'
     value: 5690646
 
@@ -35,11 +35,11 @@ variables:
     long_name: 'z_position_of_lidar'
     value: 249.8 
 
-	
+
 parameters:
   # output_block_size:
   input:
-    path: ..\data\WP2\
+    path: C:\Users\tklaas\Documents\Projekte\NEWA\NEWA_Kassel_Data\WP2_Triton\
     format: Triton
   output:
     path: .\converted
