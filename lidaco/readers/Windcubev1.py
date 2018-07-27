@@ -1,9 +1,6 @@
-# Adapted from Windcubev2, but not yet tested
-
 import datetime
 import numpy as np
 from ..core.Reader import Reader
-
 
 class Windcubev1(Reader):
 
@@ -36,13 +33,7 @@ class Windcubev1(Reader):
     def output_filename(self, filename):
         return filename[:-4]
     
-    # remove this from params but set it manually here
-#    def required_params(self):
-#        return ['position_x_input', 'position_y_input', 'position_z_input']
-
     def read_to(self, output_dataset, input_filepath, configs, appending):
-
-
         # read file
         with open(input_filepath, encoding='latin-1') as f:
             data = f.readlines()
@@ -63,7 +54,6 @@ class Windcubev1(Reader):
                     data[parameters['HeaderLength'] + 2].split('\t')[0],
                     '%d/%m/%Y %H:%M:%S')
 
-
             # general data set description
             output_dataset.site = parameters['Localisation']
 
@@ -78,11 +68,9 @@ class Windcubev1(Reader):
             range1[:] = np.array(parameters['Altitudes(m)'])
 
 
-
             time = output_dataset.createVariable('time', str, ('time',))
             time.units = 's'
-            time.long_name = 'seconds since ' + parameters['first_timestamp'].strftime('%Y/%m/%d') + ' 00:00:00'
-            
+            time.long_name = 'Time UTC in ISO 8601 format yyyy-mm-ddThh:mm:ssZ'            
 
             # create the beam steering and location variables
             yaw = output_dataset.createVariable('yaw', 'f4')
@@ -100,12 +88,11 @@ class Windcubev1(Reader):
             roll.long_name = 'lidar_roll_angle'
             roll[:] = parameters['RollAngle(°)']
 
-
             # create the data variables
             scan_type = output_dataset.createVariable('scan_type', 'i')
             scan_type.units = 'none'
             scan_type.long_name = 'scan_type_of_the_measurement'
-            scan_type[:] = 1
+            scan_type[:] = 2
 
             accumulation_time = output_dataset.createVariable('accumulation_time', 'f4')
             accumulation_time.units = 'seconds'
@@ -117,9 +104,7 @@ class Windcubev1(Reader):
             n_spectra.long_name = 'number_of_pulses'
             n_spectra[:] = parameters['NumberOfAveragedShots']
 
-
-
-
+            # high resolution rtd files
             if filetype == 'rtd':
                 VEL = output_dataset.createVariable('VEL', 'f4', ('time', 'range'))
                 VEL.units = 'm.s-1'
@@ -127,37 +112,120 @@ class Windcubev1(Reader):
                 
                 azimuth_angle = output_dataset.createVariable('azimuth_angle', 'f4', ('time'))
                 azimuth_angle.units = 'degrees'
-                azimuth_angle.long_name = 'azimuth_angle_of_lidar beam'
+                azimuth_angle.long_name = 'azimuth_angle_of_lidar_beam'
     
                 elevation_angle = output_dataset.createVariable('elevation_angle', 'f4', ('time'))
                 elevation_angle.units = 'degrees'
-                elevation_angle.long_name = 'elevation_angle_of_lidar beam'
+                elevation_angle.long_name = 'elevation_angle_of_lidar_beam'
+
+                CNR = output_dataset.createVariable('CNR', 'f4', ('time', 'range'))
+                CNR.units = 'dB'
+                CNR.long_name = 'carrier_to_noise_ratio'
+                
+                WIDTH = output_dataset.createVariable('WIDTH', 'f4', ('time', 'range'))
+                WIDTH.units = 'm.s-1'
+                WIDTH.long_name = 'doppler_spectrum_width'
+                
+                T_internal = output_dataset.createVariable('T_internal', 'f4', ('time',))
+                T_internal.units = 'degrees C'
+                T_internal.long_name = 'internal_temperature'
+                
+                wiper = output_dataset.createVariable('wiper', 'f4', ('time',))
+                wiper.units = 'V'
+                wiper.long_name = 'Wiper count Vbatt'
             
+            # 10 minute mean data sta files
             else:
                 WS = output_dataset.createVariable('WS', 'f4', ('time', 'range'))
                 WS.units = 'm.s-1'
-                WS.long_name = 'mean of scalar wind speed'
+                WS.long_name = 'mean_of_scalar_wind_speed'
                 
+                WSstd = output_dataset.createVariable('WSstd', 'f4', ('time', 'range'))
+                WSstd.units = 'm.s-1'
+                WSstd.long_name = 'standard_deviation_of_scalar_wind_speed'
                 
+                WSmax = output_dataset.createVariable('WSmax', 'f4', ('time', 'range'))
+                WSmax.units = 'm.s-1'
+                WSmax.long_name = 'maximum_of_scalar_wind_speed'
                 
+                WSmin = output_dataset.createVariable('WSmin', 'f4', ('time', 'range'))
+                WSmin.units = 'm.s-1'
+                WSmin.long_name = 'minimum_of_scalar_wind_speed'
                 
+                DIR = output_dataset.createVariable('DIR', 'f4', ('time', 'range'))
+                DIR.units = 'degrees'
+                DIR.long_name = 'mean_wind_direction'
                 
-            CNR = output_dataset.createVariable('CNR', 'f4', ('time', 'range'))
-            CNR.units = 'dB'
-            CNR.long_name = 'carrier-to-noise ratio'
+                u = output_dataset.createVariable('u', 'f4', ('time', 'range'))
+                u.units = 'm.s-1'
+                u.long_name = 'mean_u_component_of_wind_speed'
+                
+                ustd = output_dataset.createVariable('ustd', 'f4', ('time', 'range'))
+                ustd.units = 'm.s-1'
+                ustd.long_name = 'standard_deviation_of_u_component_of_wind_speed'
+                
+                v = output_dataset.createVariable('v', 'f4', ('time', 'range'))
+                v.units = 'm.s-1'
+                v.long_name = 'mean_v_component_of_wind_speed'
+                
+                vstd = output_dataset.createVariable('vstd', 'f4', ('time', 'range'))
+                vstd.units = 'm.s-1'
+                vstd.long_name = 'standard_deviation_of_v_component_of_wind_speed'
+                
+                w = output_dataset.createVariable('w', 'f4', ('time', 'range'))
+                w.units = 'm.s-1'
+                w.long_name = 'mean_w_component_of_wind_speed'
+                
+                wstd = output_dataset.createVariable('wstd', 'f4', ('time', 'range'))
+                wstd.units = 'm.s-1'
+                wstd.long_name = 'standard_deviation_of_w_component_of_wind_speed'
+                
+                CNR = output_dataset.createVariable('CNR', 'f4', ('time', 'range'))
+                CNR.units = 'dB'
+                CNR.long_name = 'mean_carrier_to_noise_ratio'
+                            
+                CNRstd = output_dataset.createVariable('CNRstd', 'f4', ('time', 'range'))
+                CNRstd.units = 'dB'
+                CNRstd.long_name = 'standard_deviation_of_carrier_to_noise_ratio'
+                
+                CNRmax = output_dataset.createVariable('CNRmax', 'f4', ('time', 'range'))
+                CNRmax.units = 'dB'
+                CNRmax.long_name = 'maximum_carrier_to_noise_ratio'
+                            
+                CNRmin = output_dataset.createVariable('CNRmin', 'f4', ('time', 'range'))
+                CNRmin.units = 'dB'
+                CNRmin.long_name = 'minimum_carrier_to_noise_ratio'
+                
+                WIDTH = output_dataset.createVariable('WIDTH', 'f4', ('time', 'range'))
+                WIDTH.units = 'm.s-1'
+                WIDTH.long_name = 'mean_doppler_spectrum_width'
+                
+                WIDTHstd = output_dataset.createVariable('WIDTHstd', 'f4', ('time', 'range'))
+                WIDTHstd.units = 'm.s-1'
+                WIDTHstd.long_name = 'standard_deviation_of_doppler_spectrum_width'
+                
+                T_internal = output_dataset.createVariable('T_internal', 'f4', ('time',))
+                T_internal.units = 'degrees C'
+                T_internal.long_name = 'mean_internal_temperature'
+                
+                Availability = output_dataset.createVariable('Availability', 'f4', ('time','range'))
+                Availability.units = 'percent'
+                Availability.long_name = '10_minute_availability'
+                
+                wiper = output_dataset.createVariable('wiper', 'f4', ('time',))
+                wiper.units = 'V'
+                wiper.long_name = 'Wiper count Vbatt'
 
-            WIDTH = output_dataset.createVariable('WIDTH', 'f4', ('time', 'range'))
-            WIDTH.units = 'm.s-1'
-            WIDTH.long_name = 'doppler_spectrum_width'
+            # fill values from dataset
+            data_timeseries = [row.strip().split('\t') for row in data[parameters['HeaderLength'] + 3:]]
 
-            T_internal = output_dataset.createVariable('T_internal', 'f4', ('time',))
-            T_internal.units = 'degrees C'
-            T_internal.long_name = 'temperature'
-            
-            wiper = output_dataset.createVariable('wiper', 'f4', ('time',))
-            wiper.units = 'V'
-            wiper.long_name = 'Wiper count Vbatt'
-            
+            # e.g. radial velocity starts at 5th column and is then repeated every 9th column
+            if filetype == 'rtd': # high resolution data
+                timestamp_input = [datetime.datetime.strptime(row[0][:-3],'%d/%m/%Y %H:%M:%S') for row in data_timeseries]
+                timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
+                output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
+                
+                output_dataset.variables['T_internal'][:] = [float(row[2]) for row in data_timeseries]
 
             # fill values from dataset
             data_timeseries = [row.strip().split('\t') for row in data[parameters['HeaderLength'] + 3:]]
@@ -175,17 +243,31 @@ class Windcubev1(Reader):
                 output_dataset.variables['wiper'][:] = [float(row[3]) for row in data_timeseries]       #needs to be validated with a rtd-File!!!!!!!!!!!!!!!!!!
                 output_dataset.variables['azimuth_angle'][:] = [float(row[1]) for row in data_timeseries]
                 output_dataset.variables['elevation_angle'][:] = [parameters['ScanAngle(°)'] for row in data_timeseries]
-                
                 output_dataset.variables['VEL'][:, :] = [[float(value) for value in row[7::8]] for row in data_timeseries]
                 output_dataset.variables['WIDTH'][:, :] = [[float(value) for value in row[5::8]] for row in data_timeseries]
-                output_dataset.variables['CNR'][:, :] = [[float(value) for value in row[4::8]] for row in data_timeseries]
+                output_dataset.variables['CNR'][:, :] = [[float(value) for value in row[4::8]] for row in data_timeseries]                
                 
-                
-            else:
+            else: # filetype == 'sta' 10 minute mean values
                 timestamp_input = [datetime.datetime.strptime(row[0],'%d/%m/%Y %H:%M:%S') for row in data_timeseries]
                 timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
                 output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
                 output_dataset.variables['wiper'][:] = [float(row[1]) for row in data_timeseries]
+                output_dataset.variables['T_internal'][:] = [float(row[2]) for row in data_timeseries]
                 output_dataset.variables['WS'][:, :] = [[float(value) for value in row[3::19]] for row in data_timeseries]
-                output_dataset.variables['WIDTH'][:, :] = [[float(value) for value in row[18::19]] for row in data_timeseries]
+                output_dataset.variables['WSstd'][:, :] = [[float(value) for value in row[4::19]] for row in data_timeseries]
+                output_dataset.variables['WSmax'][:, :] = [[float(value) for value in row[5::19]] for row in data_timeseries]
+                output_dataset.variables['WSmin'][:, :] = [[float(value) for value in row[6::19]] for row in data_timeseries]
+                output_dataset.variables['DIR'][:, :] = [[float(value) for value in row[7::19]] for row in data_timeseries]
+                output_dataset.variables['u'][:, :] = [[float(value) for value in row[8::19]] for row in data_timeseries]
+                output_dataset.variables['ustd'][:, :] = [[float(value) for value in row[9::19]] for row in data_timeseries]
+                output_dataset.variables['v'][:, :] = [[float(value) for value in row[10::19]] for row in data_timeseries]
+                output_dataset.variables['vstd'][:, :] = [[float(value) for value in row[11::19]] for row in data_timeseries]
+                output_dataset.variables['w'][:, :] = [[float(value) for value in row[12::19]] for row in data_timeseries]
+                output_dataset.variables['wstd'][:, :] = [[float(value) for value in row[13::19]] for row in data_timeseries]
                 output_dataset.variables['CNR'][:, :] = [[float(value) for value in row[14::19]] for row in data_timeseries]
+                output_dataset.variables['CNRstd'][:, :] = [[float(value) for value in row[15::19]] for row in data_timeseries]
+                output_dataset.variables['CNRmax'][:, :] = [[float(value) for value in row[16::19]] for row in data_timeseries]
+                output_dataset.variables['CNRmin'][:, :] = [[float(value) for value in row[17::19]] for row in data_timeseries]
+                output_dataset.variables['WIDTH'][:, :] = [[float(value) for value in row[18::19]] for row in data_timeseries]
+                output_dataset.variables['WIDTHstd'][:, :] = [[float(value) for value in row[19::19]] for row in data_timeseries]
+                output_dataset.variables['Availability'][:, :] = [[float(value) for value in row[20::19]] for row in data_timeseries]

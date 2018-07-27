@@ -1,0 +1,46 @@
+imports: # read in order
+  - ./general/NEWA_Kassel_general_dataset.yaml
+  - ./instruments/Windcubev1_general_instrument_description.yaml
+  - ./processing/NEWA_Kassel_data_processing_history.yaml
+
+attributes:
+
+  # specific device description
+  serial_number: '#72'
+  specific_lidar_name: ''
+  specific_lidar_owner: 'Fraunhofer IEE'
+  specific_lidar_operator: 'Fraunhofer IEE'
+  instrument_comment: 'The installation site ID of this instrument is WP3, compare experiment documentation report. It was installed north-east of MM140.'
+  
+  # specific measurement configuration
+  configuration_comment: ''
+
+
+variables:   
+  position_x:
+    data_type: 'f4'
+    units: 'degrees east'
+    long_name: 'x_position_of_lidar'
+    value: 512555
+
+  position_y:
+    data_type: 'f4'
+    units: 'degrees north'
+    long_name: 'y_position_of_lidar'
+    value: 5688544
+
+  position_z:
+    data_type: 'f4'
+    units: 'meters'
+    long_name: 'z_position_of_lidar'
+    value: 273.1 
+
+
+parameters:
+  # output_block_size: 100
+  input:
+    path: ..\data\WP3\sta
+    format: Windcubev1
+  output:
+    path: .\converted
+    format: NetCDF4

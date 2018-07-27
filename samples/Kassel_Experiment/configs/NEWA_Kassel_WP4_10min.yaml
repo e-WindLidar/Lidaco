@@ -1,0 +1,55 @@
+imports: # read in order
+  - ./general/NEWA_Kassel_general_dataset.yaml
+  - ./instruments/ZephIR300_general_instrument_description.yaml
+  - ./processing/NEWA_Kassel_data_processing_history.yaml
+
+attributes:
+
+  # specific device description
+  serial_number: '#317'
+  specific_lidar_name: ''
+  specific_lidar_owner: 'DTU Wind'
+  specific_lidar_operator: 'Fraunhofer IEE'
+  instrument_comment: 'The installation site ID of this instrument is WP4, compare experiment documentation report. It was installed south of MM140.'
+  
+  # specific measurement configuration
+  n_gates_vary: 'false'
+  spatial_averaging_info: ''
+  beam_sweeping: 'false'
+  measurement_scenario: 'VAD'
+  n_lidars: '0'
+  linked_lidars: 'not applicable'
+  configuration_comment: ''
+
+  accumulation_time: 1
+
+
+
+variables:   
+  position_x:
+    data_type: 'f4'
+    units: 'degrees east'
+    long_name: 'x_position_of_lidar'
+    value: 511524
+
+  position_y:
+    data_type: 'f4'
+    units: 'degrees north'
+    long_name: 'y_position_of_lidar'
+    value: 5684924
+
+  position_z:
+    data_type: 'f4'
+    units: 'meters'
+    long_name: 'z_position_of_lidar'
+    value: 266.6
+
+
+parameters:
+  # output_block_size: 
+  input:
+    path: ..\data\WP4\10min
+    format: ZephIR300
+  output:
+    path: .\converted
+    format: NetCDF4

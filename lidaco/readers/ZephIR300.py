@@ -140,4 +140,3 @@ class ZephIR300(Reader):
         output_dataset.variables['DIR'][:, :] = dir_list_complete.values
         
 
-

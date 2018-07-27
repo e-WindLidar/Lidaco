@@ -1,0 +1,15 @@
+attributes:
+
+  # general instrument description
+  lidar_technology: 'pulsed'
+  lidar_scanning_type: 'vertical profiling'
+  lidar_range_classification: 'long'
+  lidar_installation_type: 'ground_based'
+  product_name: 'Leosphere WLS70'
+  lidar_is_mobile: 'false'
+  lidar_orientation: 'not applicable'
+  flow_direction_encoding: '1'
+  n_gates_vary: 'false'
+  spatial_averaging_info: ''
+  beam_sweeping: 'false'
+  measurement_scenario: 'DBS'
