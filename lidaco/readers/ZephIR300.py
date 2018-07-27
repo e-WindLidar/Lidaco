@@ -91,7 +91,7 @@ class ZephIR300(Reader):
         p.units = 'degrees'
         p.long_name = 'lidar_yaw_angle'
         
-        wiper = output_dataset.createVariable('wiper', 'f4', ('time',))
+        wiper = output_dataset.createVariable('proportion_of_rain', 'f4', ('time',))
         wiper.units = 'percent'
         wiper.long_name = 'Proportion Of Packets With Rain'
 
