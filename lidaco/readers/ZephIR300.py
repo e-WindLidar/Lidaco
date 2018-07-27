@@ -11,7 +11,7 @@ class ZephIR300(Reader):
         super().__init__(False)
 
     def accepts_file(self, filename):
-        return filename.endswith('.csv')
+        return (filename.endswith('.csv') & filename.startswith('Wind'))
 
     def output_filename(self, filename):
         return filename[:-4]
@@ -28,7 +28,7 @@ class ZephIR300(Reader):
 
         # read file
         
-        ten_min_file = (re.findall(r'(?<=\\)\w+(?=@)',input_filepath)[0] == r'Wind10_317')
+        ten_min_file = (re.findall(r'(?<=\\)\w+(?=_)',input_filepath)[0] == r'Wind10')
 
 
         df=pd.read_csv(input_filepath,sep=';',skiprows=1,decimal=',')
@@ -92,8 +92,8 @@ class ZephIR300(Reader):
         p.long_name = 'lidar_yaw_angle'
         
         wiper = output_dataset.createVariable('wiper', 'f4', ('time',))
-        wiper.units = 'V'
-        wiper.long_name = 'Wiper count Vbatt'
+        wiper.units = 'percent'
+        wiper.long_name = 'Proportion Of Packets With Rain'
 
         WS = output_dataset.createVariable('WS', 'f4', ('time', 'range'))
         WS.units = 'm.s-1'
@@ -108,7 +108,7 @@ class ZephIR300(Reader):
         df['timestamp_iso8601'] = df['Time and Date'].apply(ZephIR300.parse_time)
         output_dataset.variables['time'][:] = df['timestamp_iso8601'].values
 
-#        data_timeseries = [row.strip().split(';') for row in data[2:]]
+
 
         output_dataset.variables['T_external'][:] = df['Air Temp. (C)'].values
         
@@ -116,7 +116,7 @@ class ZephIR300(Reader):
         output_dataset.variables['yaw'][:] = df['ZephIR Bearing (deg)'].values
         output_dataset.variables['rh'][:] = df['Humidity (%)'].values
         output_dataset.variables['p'][:] = df['Pressure (mbar)'].values
-        output_dataset.variables['wiper'][:] = df['Battery (V)'].values
+        output_dataset.variables['wiper'][:] = df['Proportion Of Packets With Rain (%)'].values
         # e.g. radial velocity starts at 5th column and is then repeated every 9th column
         
         met_ws_list = df.iloc[:,16]
