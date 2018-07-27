@@ -34,7 +34,6 @@ class Windcubev1(Reader):
         return filename[:-4]
     
     def read_to(self, output_dataset, input_filepath, configs, appending):
-
         # read file
         with open(input_filepath, encoding='latin-1') as f:
             data = f.readlines()
@@ -67,6 +66,7 @@ class Windcubev1(Reader):
             range1.units = 'm'
             range1.long_name = 'range_gate_distance_from_lidar'
             range1[:] = np.array(parameters['Altitudes(m)'])
+
 
             time = output_dataset.createVariable('time', str, ('time',))
             time.units = 's'
@@ -129,6 +129,10 @@ class Windcubev1(Reader):
                 T_internal = output_dataset.createVariable('T_internal', 'f4', ('time',))
                 T_internal.units = 'degrees C'
                 T_internal.long_name = 'internal_temperature'
+                
+                wiper = output_dataset.createVariable('wiper', 'f4', ('time',))
+                wiper.units = 'V'
+                wiper.long_name = 'Wiper count Vbatt'
             
             # 10 minute mean data sta files
             else:
@@ -207,6 +211,10 @@ class Windcubev1(Reader):
                 Availability = output_dataset.createVariable('Availability', 'f4', ('time','range'))
                 Availability.units = 'percent'
                 Availability.long_name = '10_minute_availability'
+                
+                wiper = output_dataset.createVariable('wiper', 'f4', ('time',))
+                wiper.units = 'V'
+                wiper.long_name = 'Wiper count Vbatt'
 
             # fill values from dataset
             data_timeseries = [row.strip().split('\t') for row in data[parameters['HeaderLength'] + 3:]]
@@ -218,9 +226,23 @@ class Windcubev1(Reader):
                 output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
                 
                 output_dataset.variables['T_internal'][:] = [float(row[2]) for row in data_timeseries]
+
+            # fill values from dataset
+            data_timeseries = [row.strip().split('\t') for row in data[parameters['HeaderLength'] + 3:]]
+            
+            # check if Windcubev2.util_process_time works here, should be the same as for Windcube v2
+            # check implementation of azimuth, elevation, ...
+            
+            #  check if this is correct
+            # e.g. radial velocity starts at 5th column and is then repeated every 9th column
+            if filetype == 'rtd':
+                timestamp_input = [datetime.datetime.strptime(row[0][:-3],'%d/%m/%Y %H:%M:%S') for row in data_timeseries]
+                timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
+                output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
+                output_dataset.variables['T_internal'][:] = [float(row[2]) for row in data_timeseries]
+                output_dataset.variables['wiper'][:] = [float(row[3]) for row in data_timeseries]       #needs to be validated with a rtd-File!!!!!!!!!!!!!!!!!!
                 output_dataset.variables['azimuth_angle'][:] = [float(row[1]) for row in data_timeseries]
                 output_dataset.variables['elevation_angle'][:] = [parameters['ScanAngle(°)'] for row in data_timeseries]
-                
                 output_dataset.variables['VEL'][:, :] = [[float(value) for value in row[7::8]] for row in data_timeseries]
                 output_dataset.variables['WIDTH'][:, :] = [[float(value) for value in row[5::8]] for row in data_timeseries]
                 output_dataset.variables['CNR'][:, :] = [[float(value) for value in row[4::8]] for row in data_timeseries]                
@@ -229,6 +251,7 @@ class Windcubev1(Reader):
                 timestamp_input = [datetime.datetime.strptime(row[0],'%d/%m/%Y %H:%M:%S') for row in data_timeseries]
                 timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
                 output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
+                output_dataset.variables['wiper'][:] = [float(row[1]) for row in data_timeseries]
                 output_dataset.variables['T_internal'][:] = [float(row[2]) for row in data_timeseries]
                 output_dataset.variables['WS'][:, :] = [[float(value) for value in row[3::19]] for row in data_timeseries]
                 output_dataset.variables['WSstd'][:, :] = [[float(value) for value in row[4::19]] for row in data_timeseries]
