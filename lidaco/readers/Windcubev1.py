@@ -216,19 +216,9 @@ class Windcubev1(Reader):
                 wiper_count.units = ''
                 wiper_count.long_name = 'wiper_count'
 
-            # fill values from dataset
-            data_timeseries = [row.strip().split('\t') for row in data[parameters['HeaderLength'] + 3:]]
-
-            # e.g. radial velocity starts at 5th column and is then repeated every 9th column
-            if filetype == 'rtd': # high resolution data
-                timestamp_input = [datetime.datetime.strptime(row[0][:-3],'%d/%m/%Y %H:%M:%S') for row in data_timeseries]
-                timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
-                output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
-                
-                output_dataset.variables['T_internal'][:] = [float(row[2]) for row in data_timeseries]
 
             # fill values from dataset
-            data_timeseries = [row.strip().split('\t') for row in data[parameters['HeaderLength'] + 3:]]
+            data_timeseries = [row.strip().split('\t') for row in data[parameters['HeaderLength'] + 2:]]
             
             # e.g. radial velocity starts at 5th column and is then repeated every 9th column
             if filetype == 'rtd':

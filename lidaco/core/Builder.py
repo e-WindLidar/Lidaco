@@ -1,4 +1,5 @@
 from os import path
+import pathlib
 
 from lidaco.core.Writer import Writer
 
@@ -142,6 +143,9 @@ class Builder:
         reader.set_configs(self.configs)
         reader.verify_parameters()
         input_path = self.configs.get_resolved('parameters', 'input', 'path')
+        output_path = path.join(input_path,self.params('output', 'path'))
+        pathlib.Path(output_path).mkdir(parents=True, exist_ok=True)
+        
         files = reader.fetch_input_files(input_path)
 
         for i, group in enumerate(files):
@@ -154,7 +158,7 @@ class Builder:
 
             if first_of_batch:
                 output_name = reader.output_filename(group['id'])
-                writer = self.module_loader.get_writer()(input_path, output_name)
+                writer = self.module_loader.get_writer()(output_path, output_name)
                 out_complete = writer.file_path()
 
             Logger.log('started_r_files', group['files'])
