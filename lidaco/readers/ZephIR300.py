@@ -28,7 +28,7 @@ class ZephIR300(Reader):
 
         # read file
         
-        ten_min_file = (re.findall(r'(?<=\\)\w+(?=_)',input_filepath)[0] == r'Wind10')
+        ten_min_file = (re.findall(r'(?<=\\)\w+(?=_\d+@)',input_filepath)[0] == r'Wind10')
 
 
         df=pd.read_csv(input_filepath,sep=';',skiprows=1,decimal=',')
@@ -91,9 +91,10 @@ class ZephIR300(Reader):
         p.units = 'degrees'
         p.long_name = 'lidar_yaw_angle'
         
-        wiper = output_dataset.createVariable('proportion_of_rain', 'f4', ('time',))
-        wiper.units = 'percent'
-        wiper.long_name = 'Proportion Of Packets With Rain'
+        if ten_min_file:
+            proportion_of_rain = output_dataset.createVariable('proportion_of_rain', 'f4', ('time',))
+            proportion_of_rain.units = 'percent'
+            proportion_of_rain.long_name = 'Proportion Of Packets With Rain'
 
         WS = output_dataset.createVariable('WS', 'f4', ('time', 'range'))
         WS.units = 'm.s-1'
@@ -103,21 +104,17 @@ class ZephIR300(Reader):
         DIR.units = 'degrees north'
         DIR.long_name = 'wind direction from north'
 
-        # fill values from dataset
-        
+        # fill values from dataset        
         df['timestamp_iso8601'] = df['Time and Date'].apply(ZephIR300.parse_time)
-        output_dataset.variables['time'][:] = df['timestamp_iso8601'].values
-
-
-
-        output_dataset.variables['T_external'][:] = df['Air Temp. (C)'].values
-        
+        output_dataset.variables['time'][:] = df['timestamp_iso8601'].values        
+        output_dataset.variables['T_external'][:] = df['Air Temp. (C)'].values        
         output_dataset.variables['tilt'][:] = df['Tilt (deg)'].values
         output_dataset.variables['yaw'][:] = df['ZephIR Bearing (deg)'].values
         output_dataset.variables['rh'][:] = df['Humidity (%)'].values
         output_dataset.variables['p'][:] = df['Pressure (mbar)'].values
-        output_dataset.variables['wiper'][:] = df['Proportion Of Packets With Rain (%)'].values
-        # e.g. radial velocity starts at 5th column and is then repeated every 9th column
+        
+        if ten_min_file:
+            output_dataset.variables['proportion_of_rain'][:] = df['Proportion Of Packets With Rain (%)'].values
         
         met_ws_list = df.iloc[:,16]
         met_dir_list = df.iloc[:,17]
@@ -129,9 +126,7 @@ class ZephIR300(Reader):
 
         else:
             ws_list = df.iloc[:,20:-1:3]
-            dir_list = df.iloc[:,19:-1:3]
-        
-        
+            dir_list = df.iloc[:,19:-2:3]  
         
         ws_list_complete = pd.concat([ws_list,met_ws_list],join='inner',axis=1)
         dir_list_complete = pd.concat([dir_list,met_dir_list],join='inner',axis=1)
