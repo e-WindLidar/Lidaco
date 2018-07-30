@@ -130,9 +130,9 @@ class Windcubev1(Reader):
                 T_internal.units = 'degrees C'
                 T_internal.long_name = 'internal_temperature'
                 
-                wiper = output_dataset.createVariable('wiper', 'f4', ('time',))
-                wiper.units = 'V'
-                wiper.long_name = 'Wiper count Vbatt'
+                wiper_state = output_dataset.createVariable('wiper_state', 'f4', ('time',))
+                wiper_state.units = ''
+                wiper_state.long_name = 'wiper_state'
             
             # 10 minute mean data sta files
             else:
@@ -212,9 +212,9 @@ class Windcubev1(Reader):
                 Availability.units = 'percent'
                 Availability.long_name = '10_minute_availability'
                 
-                wiper = output_dataset.createVariable('wiper', 'f4', ('time',))
-                wiper.units = 'V'
-                wiper.long_name = 'Wiper count Vbatt'
+                wiper_count = output_dataset.createVariable('wiper_count', 'f4', ('time',))
+                wiper_count.units = ''
+                wiper_count.long_name = 'wiper_count'
 
             # fill values from dataset
             data_timeseries = [row.strip().split('\t') for row in data[parameters['HeaderLength'] + 3:]]
@@ -230,17 +230,13 @@ class Windcubev1(Reader):
             # fill values from dataset
             data_timeseries = [row.strip().split('\t') for row in data[parameters['HeaderLength'] + 3:]]
             
-            # check if Windcubev2.util_process_time works here, should be the same as for Windcube v2
-            # check implementation of azimuth, elevation, ...
-            
-            #  check if this is correct
             # e.g. radial velocity starts at 5th column and is then repeated every 9th column
             if filetype == 'rtd':
                 timestamp_input = [datetime.datetime.strptime(row[0][:-3],'%d/%m/%Y %H:%M:%S') for row in data_timeseries]
                 timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
                 output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
-                output_dataset.variables['T_internal'][:] = [float(row[2]) for row in data_timeseries]
-                output_dataset.variables['wiper'][:] = [float(row[3]) for row in data_timeseries]       #needs to be validated with a rtd-File!!!!!!!!!!!!!!!!!!
+                output_dataset.variables['T_internal'][:] = [float(row[2]) for row in data_timeseries]           
+                output_dataset.variables['wiper_state'][:] = np.array([row[3] for row in data_timeseries]) == 'On'
                 output_dataset.variables['azimuth_angle'][:] = [float(row[1]) for row in data_timeseries]
                 output_dataset.variables['elevation_angle'][:] = [parameters['ScanAngle(°)'] for row in data_timeseries]
                 output_dataset.variables['VEL'][:, :] = [[float(value) for value in row[7::8]] for row in data_timeseries]
@@ -251,7 +247,7 @@ class Windcubev1(Reader):
                 timestamp_input = [datetime.datetime.strptime(row[0],'%d/%m/%Y %H:%M:%S') for row in data_timeseries]
                 timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
                 output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
-                output_dataset.variables['wiper'][:] = [float(row[1]) for row in data_timeseries]
+                output_dataset.variables['wiper_count'][:] = [float(row[1]) for row in data_timeseries]
                 output_dataset.variables['T_internal'][:] = [float(row[2]) for row in data_timeseries]
                 output_dataset.variables['WS'][:, :] = [[float(value) for value in row[3::19]] for row in data_timeseries]
                 output_dataset.variables['WSstd'][:, :] = [[float(value) for value in row[4::19]] for row in data_timeseries]
