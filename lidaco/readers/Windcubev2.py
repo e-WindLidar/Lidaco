@@ -1,4 +1,5 @@
 import numpy as np
+from pathlib import Path
 from ..core.Reader import Reader
 import datetime
 
@@ -216,42 +217,48 @@ class Windcubev2(Reader):
 
             # fill values from dataset
             data_timeseries = [row.strip().split('\t') for row in data[parameters['HeaderSize'] + 2:]]
-            
-            if filetype == 'rtd': # high resolution data
-            
-                timestamp_input = [datetime.datetime.strptime(row[0][:-3],'%Y/%m/%d %H:%M:%S') for row in data_timeseries]
-                timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
-                output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
-                output_dataset.variables['T_internal'][:] = [float(row[2]) for row in data_timeseries]
-                output_dataset.variables['wiper'][:] = [float(row[3]) for row in data_timeseries]
-                output_dataset.variables['azimuth_angle'][:] = [float(row[1]) if row[1] != 'V' else 0 for row in
-                                                                data_timeseries]
-                output_dataset.variables['elevation_angle'][:] = [90 - parameters['ScanAngle (°)'] if row[1] != 'V' else 90
-                                                                  for
-                                                                  row
-                                                                  in data_timeseries]
-                output_dataset.variables['VEL'][:, :] = [[float(value) for value in row[5::9]] for row in data_timeseries]
-                output_dataset.variables['WIDTH'][:, :] = [[float(value) for value in row[6::9]] for row in data_timeseries]
-                output_dataset.variables['CNR'][:, :] = [[float(value) for value in row[4::9]] for row in data_timeseries]
+            try:
+                if filetype == 'rtd': # high resolution data
                 
-			# filetype == 'sta' # 10 minute mean values
-            else:
-                timestamp_input = [datetime.datetime.strptime(row[0],'%Y/%m/%d %H:%M') for row in data_timeseries]
-                timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
-                output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
-                output_dataset.variables['T_internal'][:] = [float(row[1]) for row in data_timeseries]
-                output_dataset.variables['T_external'][:] = [float(row[2]) for row in data_timeseries]
-                output_dataset.variables['p'][:] = [float(row[3]) for row in data_timeseries]
-                output_dataset.variables['Rh'][:] = [float(row[4]) for row in data_timeseries]				
-                output_dataset.variables['WS'][:, :] = [[float(value) for value in row[7::12]] for row in data_timeseries]
-                output_dataset.variables['WSstd'][:, :] = [[float(value) for value in row[8::12]] for row in data_timeseries]
-                output_dataset.variables['WSmin'][:, :] = [[float(value) for value in row[9::12]] for row in data_timeseries]
-                output_dataset.variables['WSmax'][:, :] = [[float(value) for value in row[10::12]] for row in data_timeseries]
-                output_dataset.variables['DIR'][:, :] = [[float(value) for value in row[11::12]] for row in data_timeseries]
-                output_dataset.variables['w'][:, :] = [[float(value) for value in row[12::12]] for row in data_timeseries]
-                output_dataset.variables['wstd'][:, :] = [[float(value) for value in row[13::12]] for row in data_timeseries]
-                output_dataset.variables['CNR'][:, :] = [[float(value) for value in row[14::12]] for row in data_timeseries]
-                output_dataset.variables['CNRmin'][:, :] = [[float(value) for value in row[15::12]] for row in data_timeseries]				
-                output_dataset.variables['WIDTH'][:, :] = [[float(value) for value in row[16::12]] for row in data_timeseries]
-                output_dataset.variables['Availability'][:, :] = [[float(value) for value in row[17::12]] for row in data_timeseries]
-                output_dataset.variables['wiper'][:] = [float(row[6]) for row in data_timeseries]
+                    timestamp_input = [datetime.datetime.strptime(row[0][:-3],'%Y/%m/%d %H:%M:%S') for row in data_timeseries]
+                    timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
+                    output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
+                    output_dataset.variables['T_internal'][:] = [float(row[2]) for row in data_timeseries]
+                    output_dataset.variables['wiper'][:] = [float(row[3]) for row in data_timeseries]
+                    output_dataset.variables['azimuth_angle'][:] = [float(row[1]) if row[1] != 'V' else 0 for row in
+                                                                    data_timeseries]
+                    output_dataset.variables['elevation_angle'][:] = [90 - parameters['ScanAngle (°)'] if row[1] != 'V' else 90
+                                                                      for
+                                                                      row
+                                                                      in data_timeseries]
+                    output_dataset.variables['VEL'][:, :] = [[float(value) for value in row[5::9]] for row in data_timeseries]
+                    output_dataset.variables['WIDTH'][:, :] = [[float(value) for value in row[6::9]] for row in data_timeseries]
+                    output_dataset.variables['CNR'][:, :] = [[float(value) for value in row[4::9]] for row in data_timeseries]
+                    
+    			# filetype == 'sta' # 10 minute mean values
+                else:
+                    timestamp_input = [datetime.datetime.strptime(row[0],'%Y/%m/%d %H:%M') for row in data_timeseries]
+                    timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
+                    output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
+                    output_dataset.variables['T_internal'][:] = [float(row[1]) for row in data_timeseries]
+                    output_dataset.variables['T_external'][:] = [float(row[2]) for row in data_timeseries]
+                    output_dataset.variables['p'][:] = [float(row[3]) for row in data_timeseries]
+                    output_dataset.variables['Rh'][:] = [float(row[4]) for row in data_timeseries]				
+                    output_dataset.variables['WS'][:, :] = [[float(value) for value in row[7::12]] for row in data_timeseries]
+                    output_dataset.variables['WSstd'][:, :] = [[float(value) for value in row[8::12]] for row in data_timeseries]
+                    output_dataset.variables['WSmin'][:, :] = [[float(value) for value in row[9::12]] for row in data_timeseries]
+                    output_dataset.variables['WSmax'][:, :] = [[float(value) for value in row[10::12]] for row in data_timeseries]
+                    output_dataset.variables['DIR'][:, :] = [[float(value) for value in row[11::12]] for row in data_timeseries]
+                    output_dataset.variables['w'][:, :] = [[float(value) for value in row[12::12]] for row in data_timeseries]
+                    output_dataset.variables['wstd'][:, :] = [[float(value) for value in row[13::12]] for row in data_timeseries]
+                    output_dataset.variables['CNR'][:, :] = [[float(value) for value in row[14::12]] for row in data_timeseries]
+                    output_dataset.variables['CNRmin'][:, :] = [[float(value) for value in row[15::12]] for row in data_timeseries]				
+                    output_dataset.variables['WIDTH'][:, :] = [[float(value) for value in row[16::12]] for row in data_timeseries]
+                    output_dataset.variables['Availability'][:, :] = [[float(value) for value in row[17::12]] for row in data_timeseries]
+                    output_dataset.variables['wiper'][:] = [float(row[6]) for row in data_timeseries]
+
+            except Exception as err:
+                print('Error ocurred while converting %s. See error.log for details.' % input_filepath)
+           
+                with open(Path(output_dataset.filepath()).parent / 'error.log','a') as logfile:
+                    logfile.write( 'File is corrupted: %s.\t\tError Message: %s'%(input_filepath,str(err)))
