@@ -21,8 +21,9 @@ for meas_ID in meas_IDs:
     
     errLog = r'.\Lidar data\converted\0'+meas_ID+'\error.log'
     
-    file = open(errLog, 'r') 
-    errFiles = file.readlines()
-    
-    for file in errFiles:   
-        os.remove(file[:-1])
+    if os.path.isfile(errLog):
+        file = open(errLog, 'r') 
+        errFiles = file.readlines()
+        
+        for file in errFiles:   
+            os.remove(file[:-1])
