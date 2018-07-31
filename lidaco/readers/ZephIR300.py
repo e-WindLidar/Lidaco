@@ -11,7 +11,7 @@ class ZephIR300(Reader):
         super().__init__(False)
 
     def accepts_file(self, filename):
-        return (filename.endswith('.csv') & filename.startswith('Wind'))
+        return (filename.endswith(('.csv','.CSV')) & filename.startswith('Wind'))
 
     def output_filename(self, filename):
         return filename[:-4]
@@ -25,7 +25,7 @@ class ZephIR300(Reader):
 #        return ['position_x_input', 'position_y_input', 'position_z_input']
 
     def read_to(self, output_dataset, input_filepath, configs, appending):
-
+       
         # read file
         
         ten_min_file = (re.findall(r'(?<=\\)\w+(?=_\d+@)',input_filepath)[0] == r'Wind10')
@@ -140,5 +140,5 @@ class ZephIR300(Reader):
                 print('Error ocurred while converting %s. See error.log for details.' % input_filepath)
            
                 with open(Path(output_dataset.filepath()).parent / 'error.log','a') as logfile:
-                    logfile.write( 'File is corrupted: %s.\t\tError Message: %s'%(input_filepath,str(err)))
+                    logfile.write( '%s'%output_dataset.filepath() +'\n')
 
