@@ -2,6 +2,7 @@ import datetime
 import numpy as np
 from pathlib import Path
 from ..core.Reader import Reader
+import os
 
 
 
@@ -271,3 +272,4 @@ class Windcubev1(Reader):
                 with open(Path(output_dataset.filepath()).parent / 'error.log','a') as logfile:
                     logfile.write( '%s'%output_dataset.filepath() +'\n')
                     
+
