@@ -29,7 +29,7 @@ class Windcubev2(Reader):
                 return string1
 
     def accepts_file(self, filename):
-        return filename.endswith(('.sta','.rtd'))
+        return filename.endswith(('.sta','.rtd','.stdsta'))
 
     def output_filename(self, filename):
         return filename[:-4]
