@@ -1,7 +1,7 @@
 from lidaco.core.Builder import Builder
 import os
 
-meas_ID = '17'
+meas_ID = '24'
 
 
 errLog = r'.\Lidar data\converted\0'+meas_ID+'\error.log'
@@ -14,10 +14,12 @@ file1 = r'C:\Users\lpauscher\Documents\python_scripts\git\Lidaco\yamls\meas_IDs\
 builder = Builder(config_file = file1)
 builder.build()
 
+
 errLog = r'.\Lidar data\converted\0'+meas_ID+'\error.log'
 
-file = open(errLog, 'r') 
-errFiles = file.readlines()
-
-for file in errFiles:   
-    os.remove(file[:-1])
+if os.path.isfile(errLog):
+    file = open(errLog, 'r') 
+    errFiles = file.readlines()
+    
+    for file in errFiles:   
+        os.remove(file[:-1])
