@@ -1,7 +1,7 @@
 from lidaco.core.Builder import Builder
 import os
 
-meas_ID = '24'
+meas_ID = '95'
 
 
 errLog = r'.\Lidar data\converted\0'+meas_ID+'\error.log'
