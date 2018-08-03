@@ -11,13 +11,19 @@ class ZephIR300(Reader):
         super().__init__(False)
 
     def accepts_file(self, filename):
-        return (filename.endswith('.csv') & filename.startswith('Wind'))
+        return (filename.endswith(('.csv','.CSV')) & filename.startswith('Wind'))
 
     def output_filename(self, filename):
         return filename[:-4]
 
     def parse_time(string1):
-            temp = datetime.datetime.strptime(string1,'%d.%m.%Y %H:%M:%S')
+            try:
+                temp = datetime.datetime.strptime(string1,'%d.%m.%Y %H:%M:%S')
+            except:
+                try:
+                    temp = datetime.datetime.strptime(string1,'%d/%m/%Y %H:%M:%S')
+                except:
+                    temp = datetime.datetime.strptime(string1,'%d.%m.%Y %H:%M')
             temp = temp.isoformat() +'Z'
             return temp
 
@@ -25,13 +31,18 @@ class ZephIR300(Reader):
 #        return ['position_x_input', 'position_y_input', 'position_z_input']
 
     def read_to(self, output_dataset, input_filepath, configs, appending):
-
+       
         # read file
         
         ten_min_file = (re.findall(r'(?<=\\)\w+(?=_\d+@)',input_filepath)[0] == r'Wind10')
 #
         try:
-            df=pd.read_csv(input_filepath,sep=';',skiprows=1,decimal=',')
+            f = open(input_filepath)
+            f.readline()
+            header = f.readline()
+            header = header.split('Checksum')
+            myCols = header[0].split(';')
+            df=pd.read_csv(input_filepath,sep=';',skiprows=1,decimal=',',usecols=range(len(myCols)),index_col=False)   
             
     
             with open(input_filepath,'r',encoding='latin-1') as f: # get parameters from header
@@ -91,15 +102,20 @@ class ZephIR300(Reader):
             p.long_name = 'lidar_yaw_angle'
             
             if ten_min_file:
-                proportion_of_rain = output_dataset.createVariable('proportion_of_rain', 'f4', ('time',))
-                proportion_of_rain.units = 'percent'
-                proportion_of_rain.long_name = 'Proportion Of Packets With Rain'
-                
                 n_valid = output_dataset.createVariable('n_valid', 'f4', ('time', 'range'))
                 n_valid.units = '-'
                 n_valid.long_name = 'number of valid scans in averaging period'
     
-    
+                if 'Proportion Of Packets With Rain (%)' in df.columns:
+                    proportion_of_rain = output_dataset.createVariable('proportion_of_rain', 'f4', ('time',))
+                    proportion_of_rain.units = 'percent'
+                    proportion_of_rain.long_name = 'Proportion Of Packets With Rain'
+                elif 'Raining' in df.columns:
+                    proportion_of_rain = output_dataset.createVariable('rain', 'f4', ('time',))
+                    proportion_of_rain.units = 'boolean'
+                    proportion_of_rain.long_name = 'indictor for rain; 1 is rain 0 no rain'
+                
+
             WS = output_dataset.createVariable('WS', 'f4', ('time', 'range'))
             WS.units = 'm.s-1'
             WS.long_name = 'mean of scalar wind speed'
@@ -124,7 +140,10 @@ class ZephIR300(Reader):
             output_dataset.variables['p'][:] = df['Pressure (mbar)'].values
             
             if ten_min_file:
-                output_dataset.variables['proportion_of_rain'][:] = df['Proportion Of Packets With Rain (%)'].values
+                if 'Proportion Of Packets With Rain (%)' in df.columns:
+                    output_dataset.variables['proportion_of_rain'][:] = df['Proportion Of Packets With Rain (%)'].values
+                elif 'Raining' in df.columns:
+                    output_dataset.variables['rain'][:] = df['Raining'].values
             
             met_ws_list = df.iloc[:,16]
             met_dir_list = df.iloc[:,17]
@@ -148,7 +167,8 @@ class ZephIR300(Reader):
 
         except Exception as err:
                 print('Error ocurred while converting %s. See error.log for details.' % input_filepath)
+                print(err)
            
                 with open(Path(output_dataset.filepath()).parent / 'error.log','a') as logfile:
-                    logfile.write( 'File is corrupted: %s.\t\tError Message: %s'%(input_filepath,str(err)))
+                    logfile.write( '%s'%output_dataset.filepath() +'\n')
 
