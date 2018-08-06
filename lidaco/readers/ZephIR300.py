@@ -35,7 +35,7 @@ class ZephIR300(Reader):
         # read file
         
         ten_min_file = (re.findall(r'(?<=\\)\w+(?=_\d+@)',input_filepath)[0] == r'Wind10')
-
+#
         try:
             f = open(input_filepath)
             f.readline()
@@ -51,7 +51,6 @@ class ZephIR300(Reader):
                 parameters = {line.split(':')[0].strip(): line.split(':')[1].strip() for line in header if ':' in line}
                 parameters['Measurement heights'] = [int(element.strip()) for element in parameters['Measurement heights'].split('m') if (element != '')]
                 parameters['Measurement heights'].append(1)
-    
     
     
             # create the dimensions
@@ -103,6 +102,10 @@ class ZephIR300(Reader):
             p.long_name = 'lidar_yaw_angle'
             
             if ten_min_file:
+                n_valid = output_dataset.createVariable('n_valid', 'f4', ('time', 'range'))
+                n_valid.units = '-'
+                n_valid.long_name = 'number of valid scans in averaging period'
+    
                 if 'Proportion Of Packets With Rain (%)' in df.columns:
                     proportion_of_rain = output_dataset.createVariable('proportion_of_rain', 'f4', ('time',))
                     proportion_of_rain.units = 'percent'
@@ -112,7 +115,7 @@ class ZephIR300(Reader):
                     proportion_of_rain.units = 'boolean'
                     proportion_of_rain.long_name = 'indictor for rain; 1 is rain 0 no rain'
                 
-    
+
             WS = output_dataset.createVariable('WS', 'f4', ('time', 'range'))
             WS.units = 'm.s-1'
             WS.long_name = 'mean of scalar wind speed'
@@ -121,10 +124,14 @@ class ZephIR300(Reader):
             DIR.units = 'degrees north'
             DIR.long_name = 'wind direction from north'
     
+    
+    
+    
+    
             # fill values from dataset        
             df['timestamp_iso8601'] = df['Time and Date'].apply(ZephIR300.parse_time)
         
-
+    
             output_dataset.variables['time'][:] = df['timestamp_iso8601'].values        
             output_dataset.variables['T_external'][:] = df['Air Temp. (C)'].values        
             output_dataset.variables['tilt'][:] = df['Tilt (deg)'].values
@@ -140,22 +147,24 @@ class ZephIR300(Reader):
             
             met_ws_list = df.iloc[:,16]
             met_dir_list = df.iloc[:,17]
-            
     
             if ten_min_file:
-                ws_list = df.iloc[:,21:-1:8]
-                dir_list = df.iloc[:,20:-1:8]
+                ws_list = df.iloc[:,21:-2:8]
+                dir_list = df.iloc[:,20:-2:8]
+                n_valid_list = df.iloc[:,19:-2:8]
+                n_valid_complete = pd.concat([n_valid_list,pd.Series(np.full_like(met_ws_list, np.nan),name='Packets in Average at MET')],join='inner',axis=1)
+                output_dataset.variables['n_valid'][:, :] = n_valid_complete.values
     
             else:
-                ws_list = df.iloc[:,20:-1:3]
+                ws_list = df.iloc[:,20:-2:3]
                 dir_list = df.iloc[:,19:-2:3]  
             
-            ws_list_complete = pd.concat([ws_list,met_ws_list],join='inner',axis=1)
-            dir_list_complete = pd.concat([dir_list,met_dir_list],join='inner',axis=1)
+            ws_list_complete = pd.concat([ws_list, met_ws_list],join='inner',axis=1)
+            dir_list_complete = pd.concat([dir_list, met_dir_list],join='inner',axis=1)
     
             output_dataset.variables['WS'][:, :] = ws_list_complete.values
             output_dataset.variables['DIR'][:, :] = dir_list_complete.values
-            
+
         except Exception as err:
                 print('Error ocurred while converting %s. See error.log for details.' % input_filepath)
                 print(err)
