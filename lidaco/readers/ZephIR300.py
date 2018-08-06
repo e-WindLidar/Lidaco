@@ -1,93 +1,98 @@
 import numpy as np
 from ..core.Reader import Reader
 import datetime
+import pandas as pd
+import re
+from pathlib import Path
 
 class ZephIR300(Reader):
 
     def __init__(self):
         super().__init__(False)
 
-    @staticmethod
-    def util_process_time(timestring):
-        hour = timestring[:2]
-        minute = timestring[3:5]
-        seconds = timestring[6:11]
-        time = int(hour) * 3600
-        time += int(minute) * 60
-        time += float(seconds)
-        return time
-
-    @staticmethod
-    def str_to_num(string1):
-        try:
-            return int(string1)
-        except ValueError:
-            try:
-                return float(string1)
-            except ValueError:
-                return string1
-
     def accepts_file(self, filename):
-        return filename.endswith('.csv')
+        return (filename.endswith(('.csv','.CSV')) & filename.startswith('Wind'))
 
     def output_filename(self, filename):
         return filename[:-4]
 
+    def parse_time(string1):
+            try:
+                temp = datetime.datetime.strptime(string1,'%d.%m.%Y %H:%M:%S')
+            except:
+                try:
+                    temp = datetime.datetime.strptime(string1,'%d/%m/%Y %H:%M:%S')
+                except:
+                    temp = datetime.datetime.strptime(string1,'%d.%m.%Y %H:%M')
+            temp = temp.isoformat() +'Z'
+            return temp
 
-    def clean_string(string1):
-        replace_dict={',':'.','#N/A':'NaN'}
-        for key in replace_dict:
-            string1=string1.replace(key,replace_dict[key])
-
-        return string1
+#    def required_params(self):
+#        return ['position_x_input', 'position_y_input', 'position_z_input']
 
     def read_to(self, output_dataset, input_filepath, configs, appending):
-
+       
         # read file
-        with open(input_filepath, encoding='latin-1') as f:
-            data = f.readlines()
-
-            # get parameters from header
-            header = data[0].split(';')
-            parameters = {line.split(':')[0].strip(): line.split(':')[1].strip() for line in header if ':' in line}
+        
+        ten_min_file = (re.findall(r'(?<=\\)\w+(?=_\d+@)',input_filepath)[0] == r'Wind10')
+#
+        try:
+            f = open(input_filepath)
+            f.readline()
+            header = f.readline()
+            header = header.split('Checksum')
+            myCols = header[0].split(';')
+            df=pd.read_csv(input_filepath,sep=';',skiprows=1,decimal=',',usecols=range(len(myCols)),index_col=False)   
             
-            parameters['Measurement heights'] = [int(element.strip()) for element in parameters['Measurement heights'].split('m') if (element != '')]
-            parameters['Measurement heights'].append(1)
-
+    
+            with open(input_filepath,'r',encoding='latin-1') as f: # get parameters from header
+                header = f.readline()
+                header=header.split(';')
+                parameters = {line.split(':')[0].strip(): line.split(':')[1].strip() for line in header if ':' in line}
+                parameters['Measurement heights'] = [int(element.strip()) for element in parameters['Measurement heights'].split('m') if (element != '')]
+                parameters['Measurement heights'].append(1)
+    
+    
             # create the dimensions
             output_dataset.createDimension('range', len(parameters['Measurement heights']))
             output_dataset.createDimension('time', None)
-
+    
             # create the coordinate variables
             range1 = output_dataset.createVariable('range', 'f4', ('range',))
             range1.units = 'm'
             range1.long_name = 'range_gate_distance_from_lidar'
             range1[:] = np.array(parameters['Measurement heights'])
-
+    
             time = output_dataset.createVariable('time', str, ('time',))
             time.units = 's'
-            time.long_name = 'Time UTC in ISO 8601 format yyyy-mm-ddThh:mm:ssZ'
-
+            time.long_name = 'timestamp ISO 8601'
+    
             # create the data variables
             scan_type = output_dataset.createVariable('scan_type', 'i')
             scan_type.units = 'none'
             scan_type.long_name = 'scan_type_of_the_measurement'
-            scan_type[:] = 2
-			
-            # create the measurement variables            
-            # tilt of Zephir lidar is always pitch or roll, depending on what is larger
+            scan_type[:] = 1
+    
+            accumulation_time = output_dataset.createVariable('accumulation_time', 'f4')
+            accumulation_time.units = 'seconds'
+            accumulation_time.long_name = 'time_for_spectral_accumulation'
+            accumulation_time[:] = 1.0
+    
+            # create the measurement variables
+            
+            # Beschreibung einfügen
             tilt = output_dataset.createVariable('tilt', 'f4', ('time',))
             tilt.units = 'degrees north'
             tilt.long_name = 'either pitch or roll depending on higher value'
-
+    
             T_external = output_dataset.createVariable('T_external', 'f4', ('time',))
             T_external.units = 'degrees C'
             T_external.long_name = 'temperature'
-
+    
             yaw = output_dataset.createVariable('yaw', 'f4', ('time',))
             yaw.units = 'degrees'
             yaw.long_name = 'lidar_yaw_angle'
-
+    
             rh = output_dataset.createVariable('rh', 'f4', ('time',))
             rh.units = 'degrees'
             rh.long_name = 'lidar_yaw_angle'
@@ -95,6 +100,21 @@ class ZephIR300(Reader):
             p = output_dataset.createVariable('p', 'f4', ('time',))
             p.units = 'degrees'
             p.long_name = 'lidar_yaw_angle'
+            
+            if ten_min_file:
+                n_valid = output_dataset.createVariable('n_valid', 'f4', ('time', 'range'))
+                n_valid.units = '-'
+                n_valid.long_name = 'number of valid scans in averaging period'
+    
+                if 'Proportion Of Packets With Rain (%)' in df.columns:
+                    proportion_of_rain = output_dataset.createVariable('proportion_of_rain', 'f4', ('time',))
+                    proportion_of_rain.units = 'percent'
+                    proportion_of_rain.long_name = 'Proportion Of Packets With Rain'
+                elif 'Raining' in df.columns:
+                    proportion_of_rain = output_dataset.createVariable('rain', 'f4', ('time',))
+                    proportion_of_rain.units = 'boolean'
+                    proportion_of_rain.long_name = 'indictor for rain; 1 is rain 0 no rain'
+                
 
             WS = output_dataset.createVariable('WS', 'f4', ('time', 'range'))
             WS.units = 'm.s-1'
@@ -103,30 +123,52 @@ class ZephIR300(Reader):
             DIR = output_dataset.createVariable('DIR', 'f4', ('time', 'range'))
             DIR.units = 'degrees north'
             DIR.long_name = 'wind direction from north'
-
-            # fill values from dataset
-            data_timeseries = [row.strip().split(';') for row in data[2:]]
-
-            #---------------------------------------------------------------------------
-            timestamp_input = [datetime.datetime.strptime(row[1],'%d.%m.%Y %H:%M:%S') for row in data_timeseries]
-            timestamp_iso8601 = [value.isoformat()+'Z' for value in timestamp_input]
-            output_dataset.variables['time'][:] = np.array(timestamp_iso8601)
-            #---------------------------------------------------------------------------
+    
+    
+    
+    
+    
+            # fill values from dataset        
+            df['timestamp_iso8601'] = df['Time and Date'].apply(ZephIR300.parse_time)
+        
+    
+            output_dataset.variables['time'][:] = df['timestamp_iso8601'].values        
+            output_dataset.variables['T_external'][:] = df['Air Temp. (C)'].values        
+            output_dataset.variables['tilt'][:] = df['Tilt (deg)'].values
+            output_dataset.variables['yaw'][:] = df['ZephIR Bearing (deg)'].values
+            output_dataset.variables['rh'][:] = df['Humidity (%)'].values
+            output_dataset.variables['p'][:] = df['Pressure (mbar)'].values
             
-            output_dataset.variables['T_external'][:] = [float(ZephIR300.clean_string(row[13])) for row in data_timeseries]
-            output_dataset.variables['tilt'][:] = [float(ZephIR300.clean_string(row[12])) for row in data_timeseries]
-            output_dataset.variables['yaw'][:] = [float(ZephIR300.clean_string(row[11])) for row in data_timeseries]
-            output_dataset.variables['rh'][:] = [float(ZephIR300.clean_string(row[15])) for row in data_timeseries]
-            output_dataset.variables['p'][:] = [float(ZephIR300.clean_string(row[14])) for row in data_timeseries]
-
-            # e.g. radial velocity starts at 5th column and is then repeated every 9th column
-            ws_list = [[float(ZephIR300.clean_string(value)) for value in row[20::3]] for row in data_timeseries]
-            dir_list = [[float(ZephIR300.clean_string(value)) for value in row[19:-1:3]] for row in data_timeseries]
-            met_ws_list = [float(ZephIR300.clean_string(row[13])) for row in data_timeseries] #MET Wind Speed
-            met_dir_list = [float(ZephIR300.clean_string(row[13])) for row in data_timeseries]
+            if ten_min_file:
+                if 'Proportion Of Packets With Rain (%)' in df.columns:
+                    output_dataset.variables['proportion_of_rain'][:] = df['Proportion Of Packets With Rain (%)'].values
+                elif 'Raining' in df.columns:
+                    output_dataset.variables['rain'][:] = df['Raining'].values
             
-            ws_list = np.column_stack((np.array(ws_list),np.array(met_ws_list)))
-            dir_list = np.column_stack((np.array(dir_list),np.array(met_dir_list)))
+            met_ws_list = df.iloc[:,16]
+            met_dir_list = df.iloc[:,17]
+    
+            if ten_min_file:
+                ws_list = df.iloc[:,21:-2:8]
+                dir_list = df.iloc[:,20:-2:8]
+                n_valid_list = df.iloc[:,19:-2:8]
+                n_valid_complete = pd.concat([n_valid_list,pd.Series(np.full_like(met_ws_list, np.nan),name='Packets in Average at MET')],join='inner',axis=1)
+                output_dataset.variables['n_valid'][:, :] = n_valid_complete.values
+    
+            else:
+                ws_list = df.iloc[:,20:-2:3]
+                dir_list = df.iloc[:,19:-2:3]  
+            
+            ws_list_complete = pd.concat([ws_list, met_ws_list],join='inner',axis=1)
+            dir_list_complete = pd.concat([dir_list, met_dir_list],join='inner',axis=1)
+    
+            output_dataset.variables['WS'][:, :] = ws_list_complete.values
+            output_dataset.variables['DIR'][:, :] = dir_list_complete.values
 
-            output_dataset.variables['WS'][:, :] = ws_list
-            output_dataset.variables['DIR'][:, :] = dir_list
+        except Exception as err:
+                print('Error ocurred while converting %s. See error.log for details.' % input_filepath)
+                print(err)
+           
+                with open(Path(output_dataset.filepath()).parent / 'error.log','a') as logfile:
+                    logfile.write( '%s'%output_dataset.filepath() +'\n')
+
