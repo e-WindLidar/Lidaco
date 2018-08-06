@@ -23,3 +23,5 @@ if os.path.isfile(errLog):
     
     for file in errFiles:   
         os.remove(file[:-1])
+        
+#bla
