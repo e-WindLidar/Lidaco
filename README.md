@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/lidaco.svg)](https://badge.fury.io/py/lidaco)
+
 # Lidaco 
 
 Lidaco (Wind **Li**dar **Da**ta **Co**nverter) is a library and executable that enables a modular writing of data converters. 
@@ -16,7 +18,8 @@ Lidaco works on datasets that can be described using the unidata [Common Data Mo
     * Windcubev1
     * Windcubev2
     * Windscanner
-    * ZephIR300 
+    * ZephIR300
+    * Triton
     
 ##### Available Writers
     * MetadataCard
@@ -45,6 +48,10 @@ builder.build()
 ```
 
 ## Converting data
+
+####
+
+
 
 #### Writing conversion files
 
