@@ -99,7 +99,7 @@ variables:
 
 ###### Imports
 Lidaco configuration system is built to motivate the configurations reusability, so each config file can import others. With this mechanism you can to split your configurations into devices, scenarios, campaigns and so on.
-In case of collision, each the file that specify a certain config, overrides the further imported ones.
+In case of multiple definitions of an attribute or variable, the definitions in the file prevail over the others that are imported.
 
 ```yaml
 imports: # read in order
