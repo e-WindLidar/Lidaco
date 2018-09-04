@@ -34,12 +34,12 @@ Lidaco works on datasets that can be described using the unidata [Common Data Mo
 pip install lidaco
 ```
 
-##### Run
+##### Run in the command line (shell)
 ```bash
 lidaco --config-file=samples/Windscanner/config.yaml
 ```
 
-##### In code
+##### Use as a library
 ```python
 from lidaco.core.Builder import Builder
 
