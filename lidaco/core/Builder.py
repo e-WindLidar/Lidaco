@@ -69,6 +69,14 @@ class Builder:
             Logger.debug(e)
             Logger.error('inp_path_missing')
 
+        try:
+            self.configs.get('parameters', 'output', 'path')
+        except Exception as e:
+            # setting the default output folder
+            # this could be generalized and encapsulated as a setter on the config class
+            self.configs.configs['parameters']['output']['path'] = 'output'
+            self.configs.config_paths['parameters']['output']['path'] = context
+
         reader = self.params('input', 'format')
         if not is_str(reader) and issubclass(reader, Reader):
             self.module_loader.set_reader(reader)
@@ -143,7 +151,7 @@ class Builder:
         reader.set_configs(self.configs)
         reader.verify_parameters()
         input_path = self.configs.get_resolved('parameters', 'input', 'path')
-        output_path = path.join(input_path,self.params('output', 'path'))
+        output_path = self.configs.get_resolved('parameters', 'output', 'path')
         pathlib.Path(output_path).mkdir(parents=True, exist_ok=True)
         
         files = reader.fetch_input_files(input_path)

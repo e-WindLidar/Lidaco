@@ -16,7 +16,7 @@ WORKDIR /usr/src/app
 #USER python
 
 ENV PYTHONPATH="/usr/src/app:${PYTHONPATH}"
-
+RUN pip3.6 install twine
 RUN pip3.6 install netCDF4
 RUN pip3.6 install pyyaml
 

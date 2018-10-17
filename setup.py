@@ -13,7 +13,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     packages=find_packages(),
-    version='0.0.20',
+    version='0.0.28',
     description='Wind Lidar Data Converter.',
     author='e-WindLidar',
     entry_points={

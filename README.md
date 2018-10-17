@@ -64,12 +64,21 @@ The converter parameters are:
 parameters:
   input: 
     path: ./path/to/input/folder/
-    format: Windscanner
+    format: Windscanner                 # The name should match 
   output: 
-    format: NetCDF4 
+    path: ./path/to/output/folder       # optional, defaults to ./output/
+    format: NetCDF4
+  
+  # Optional, and specifies the number of input files to be concatenated per output file.
+  # If not specified defaults to 1 (1 output per input file). The last output will contain <= output_block_size input files.
+  # If the parameter is specified with None (the same as without any value), all input files will be concatenated into a single output file.
+  output_block_size: 3
 ```
+Some of these parameters can be overridden using the command arguments, run `lidaco --help` to know them.
 
-To know each specific reader/writer parameter read the respective documentation available, or try to take a look at its source code.
+When specifying relative paths, the configuration file location wherein these are specified, or the current directory when specifying them as command arguments, is the one used to resolve its absolute value.
+
+Additional parameters might be necessary depending on the specific reader/writer in use. Read the respective module documentation available, or try to take a look at its source code.
  
 ###### Attributes
 This section specify the global attributes that will be added to the dataset. You can add all attributes you desire. 
