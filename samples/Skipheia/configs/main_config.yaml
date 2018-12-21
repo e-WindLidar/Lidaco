@@ -1,0 +1,9 @@
+imports: # read in order
+  - ./WLS7_171.yaml
+  - ./Skipheia_scenario.yaml
+  - ./Skipheia_metainfo.yaml
+
+parameters:
+  data_path: ./
+  input_format: Windcubev2
+  output_format: NetCDF4
