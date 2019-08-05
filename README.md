@@ -20,6 +20,7 @@ Lidaco works on datasets that can be described using the unidata [Common Data Mo
     * Windscanner
     * ZephIR300
     * Triton
+    * Stream Line (XR)
     
 ##### Available Writers
     * MetadataCard
