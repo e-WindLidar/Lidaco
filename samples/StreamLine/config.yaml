@@ -1,0 +1,13 @@
+imports:
+  - config/device.yaml
+  - config/scenario.yaml
+  - config/metainfo.yaml
+
+parameters:
+  input:
+    path: input
+    format: StreamLine
+  output:
+    format: NetCDF4
+    path: output
+
