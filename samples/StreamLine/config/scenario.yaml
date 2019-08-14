@@ -1,0 +1,20 @@
+parameters:
+
+  output_block_size: # accepts positive values and <nothing> (in the latter case, produces only one output file)
+  n_gates: 150
+  constant_gates: 'true'
+  range_gates: '30'
+  measurement_scenarios:
+    - scenario: 'User'
+      type: 1
+      scans: '1'
+
+attributes:
+
+  # measurement configuration
+  n_gates_vary: 'false'
+  spatial_averaging_info: ''
+  beam_sweeping: 'false'
+  n_lidars: '1'
+  linked_lidars: 'not applicable'
+  configuration_comment: ''
