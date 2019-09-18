@@ -8,7 +8,7 @@ Following the configurations that are specified by the user on a config.yml(s), 
 Similarly, a Writer is also selected to write the output file(s).
 
   
-Lidaco works on datasets that can be described using the unidata [Common Data Model](https://www.unidata.ucar.edu/software/thredds/current/netcdf-java/CDM/). It can be used to process single files or entire folders. 
+Lidaco works on datasets that can be described using the unidata [Common Data Model](https://www.unidata.ucar.edu/software/thredds/current/netcdf-java/CDM/) and [e-WindLidar](https://zenodo.org/record/2478051) standard. It can be used to process single files or entire folders. 
 
 
 ##### Available Readers
