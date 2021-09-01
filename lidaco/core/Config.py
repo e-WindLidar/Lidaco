@@ -1,6 +1,6 @@
 from ..common.Utils import dict_merge, map_recursively
 from ..common.Logger import Logger
-from yaml import load
+from yaml import load, FullLoader
 from os import path
 
 
@@ -56,7 +56,7 @@ class Config:
             full_path = path.join(self.context, file_name)
             Logger.info('loading_config', full_path.replace("/./", "/"))
             with open(full_path, 'r') as stream:
-                return load(stream)
+                return load(stream, Loader=FullLoader)
         except FileNotFoundError as e:
             Logger.error('bad_config_path', full_path.replace("/./", "/"))
         except Exception as e:
