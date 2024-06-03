@@ -42,6 +42,9 @@ Changes:
         - First approach changing the galion reader to readn stream line data di not work
     2019-08-01
         -
+	2023-07-04
+		Fixed incorrect assignment of channel data (pitch, roll, etc.)
+		Gunhild Thorsen & Elliot Simon (DTU)
 
 Todo:
     - range gate distance not calculated correctly if gate overlapping is used
@@ -337,11 +340,11 @@ class StreamLine(Reader):
 
             # pitch
             _pitch = measured_info[:, 3]
-            dataset.variables['pitch'][n_times:] = _yaw
+            dataset.variables['pitch'][n_times:] = _pitch
 
             # roll
             _roll = measured_info[:, 4]
-            dataset.variables['roll'][n_times:] = _yaw
+            dataset.variables['roll'][n_times:] =  _roll
 
             # doppler
             _doppler = measured_data[:, 1].reshape(n_rays, n_gates)
@@ -349,7 +352,7 @@ class StreamLine(Reader):
 
             # intensity
             _intensity = measured_data[:, 2].reshape(n_rays, n_gates)
-            dataset.variables['INTENSITY'][n_times:] = _doppler
+            dataset.variables['INTENSITY'][n_times:] = _intensity
 
             # backscatter
             _backscatter = measured_data[:, 3].reshape(n_rays, n_gates)
